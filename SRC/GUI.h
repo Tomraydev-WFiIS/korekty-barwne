@@ -21,7 +21,9 @@
 #include <wx/scrolwin.h>
 #include <wx/sizer.h>
 #include <wx/panel.h>
-#include <wx/slider.h>
+#include <wx/notebook.h>
+#include <wx/button.h>
+#include <wx/grid.h>
 #include <wx/statusbr.h>
 #include <wx/frame.h>
 
@@ -41,9 +43,15 @@ class GUI : public wxFrame
 		wxMenu* m_menuView;
 		wxScrolledWindow* m_scrolledWindow1;
 		wxScrolledWindow* m_scrolledWindow2;
-		wxPanel* m_panel3;
-		wxSlider* m_slider1;
-		wxSlider* m_slider2;
+		wxNotebook* m_notebook1;
+		wxPanel* m_panel_hexagon;
+		wxPanel* m_panel_histograms;
+		wxNotebook* m_notebook4;
+		wxPanel* m_panel_hist_old;
+		wxPanel* m_panel_hist_new;
+		wxButton* m_buttonHistogram;
+		wxPanel* m_panel_convolutions;
+		wxGrid* m_grid3;
 		wxStatusBar* m_statusBar1;
 
 		// Virtual event handlers, overide them in your derived class
@@ -52,6 +60,7 @@ class GUI : public wxFrame
 		virtual void m_fileSaveAsOnMenuSelection( wxCommandEvent& event ) { event.Skip(); }
 		virtual void m_ViewStatusBarOnMenuSelection( wxCommandEvent& event ) { event.Skip(); }
 		virtual void m_scrolledWindow1OnLeftDClick( wxMouseEvent& event ) { event.Skip(); }
+		virtual void m_buttonHistogramOnButtonClick( wxCommandEvent& event ) { event.Skip(); }
 
 
 	public:

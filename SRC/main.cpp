@@ -19,6 +19,7 @@ bool MyApp::OnInit()
 	MyFrame *mainFrame = new MyFrame(nullptr);
 
 	mainFrame->SetTitle(wxString("PGK - Korekty barwne"));
+	mainFrame->Maximize(true);
 	mainFrame->Show(true);
 	SetTopWindow(mainFrame);
 

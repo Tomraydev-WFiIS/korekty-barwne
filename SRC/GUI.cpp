@@ -46,7 +46,7 @@ GUI::GUI( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint&
 	gSizer1->Add( m_scrolledWindow1, 1, wxEXPAND | wxALL, 5 );
 
 
-	bSizer1->Add( gSizer1, 2, wxEXPAND, 5 );
+	bSizer1->Add( gSizer1, 3, wxEXPAND, 5 );
 
 	wxGridSizer* gSizer2;
 	gSizer2 = new wxGridSizer( 1, 1, 0, 0 );
@@ -56,21 +56,72 @@ GUI::GUI( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint&
 	gSizer2->Add( m_scrolledWindow2, 1, wxEXPAND | wxALL, 5 );
 
 
-	bSizer1->Add( gSizer2, 2, wxEXPAND, 5 );
+	bSizer1->Add( gSizer2, 3, wxEXPAND, 5 );
 
 	wxGridSizer* gSizer3;
 	gSizer3 = new wxGridSizer( 0, 1, 0, 0 );
 
-	m_panel3 = new wxPanel( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
-	m_panel3->SetBackgroundColour( wxColour( 255, 255, 255 ) );
+	m_notebook1 = new wxNotebook( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
+	m_panel_hexagon = new wxPanel( m_notebook1, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+	m_notebook1->AddPage( m_panel_hexagon, wxT("Hexagon"), true );
+	m_panel_histograms = new wxPanel( m_notebook1, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+	wxBoxSizer* bSizer2;
+	bSizer2 = new wxBoxSizer( wxVERTICAL );
 
-	gSizer3->Add( m_panel3, 0, wxEXPAND | wxALL, 5 );
+	m_notebook4 = new wxNotebook( m_panel_histograms, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
+	m_panel_hist_old = new wxPanel( m_notebook4, wxID_ANY, wxDefaultPosition, wxSize( 256,-1 ), wxTAB_TRAVERSAL );
+	m_notebook4->AddPage( m_panel_hist_old, wxT("Old"), false );
+	m_panel_hist_new = new wxPanel( m_notebook4, wxID_ANY, wxDefaultPosition, wxSize( 256,-1 ), wxTAB_TRAVERSAL );
+	m_notebook4->AddPage( m_panel_hist_new, wxT("New"), false );
 
-	m_slider1 = new wxSlider( this, wxID_ANY, 50, 0, 100, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL );
-	gSizer3->Add( m_slider1, 0, wxALL, 5 );
+	bSizer2->Add( m_notebook4, 1, wxEXPAND | wxALL, 5 );
 
-	m_slider2 = new wxSlider( this, wxID_ANY, 50, 0, 100, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL );
-	gSizer3->Add( m_slider2, 0, wxALL, 5 );
+	m_buttonHistogram = new wxButton( m_panel_histograms, wxID_ANY, wxT("Generate Histograms"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer2->Add( m_buttonHistogram, 0, wxALL|wxALIGN_CENTER_HORIZONTAL, 5 );
+
+
+	m_panel_histograms->SetSizer( bSizer2 );
+	m_panel_histograms->Layout();
+	bSizer2->Fit( m_panel_histograms );
+	m_notebook1->AddPage( m_panel_histograms, wxT("Histograms"), false );
+	m_panel_convolutions = new wxPanel( m_notebook1, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+	wxBoxSizer* bSizer3;
+	bSizer3 = new wxBoxSizer( wxVERTICAL );
+
+	m_grid3 = new wxGrid( m_panel_convolutions, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
+
+	// Grid
+	m_grid3->CreateGrid( 3, 3 );
+	m_grid3->EnableEditing( true );
+	m_grid3->EnableGridLines( true );
+	m_grid3->EnableDragGridSize( false );
+	m_grid3->SetMargins( 0, 0 );
+
+	// Columns
+	m_grid3->AutoSizeColumns();
+	m_grid3->EnableDragColMove( false );
+	m_grid3->EnableDragColSize( true );
+	m_grid3->SetColLabelSize( 20 );
+	m_grid3->SetColLabelAlignment( wxALIGN_CENTER, wxALIGN_CENTER );
+
+	// Rows
+	m_grid3->EnableDragRowSize( true );
+	m_grid3->SetRowLabelSize( 30 );
+	m_grid3->SetRowLabelAlignment( wxALIGN_CENTER, wxALIGN_CENTER );
+
+	// Label Appearance
+
+	// Cell Defaults
+	m_grid3->SetDefaultCellAlignment( wxALIGN_CENTER, wxALIGN_TOP );
+	bSizer3->Add( m_grid3, 0, wxALL, 5 );
+
+
+	m_panel_convolutions->SetSizer( bSizer3 );
+	m_panel_convolutions->Layout();
+	bSizer3->Fit( m_panel_convolutions );
+	m_notebook1->AddPage( m_panel_convolutions, wxT("Convolutions"), false );
+
+	gSizer3->Add( m_notebook1, 1, wxEXPAND | wxALL, 5 );
 
 
 	bSizer1->Add( gSizer3, 0, wxEXPAND, 5 );
@@ -88,6 +139,7 @@ GUI::GUI( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint&
 	m_menuFile->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUI::m_fileSaveAsOnMenuSelection ), this, m_fileSaveAs->GetId());
 	m_menuView->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUI::m_ViewStatusBarOnMenuSelection ), this, m_ViewStatusBar->GetId());
 	m_scrolledWindow1->Connect( wxEVT_LEFT_DCLICK, wxMouseEventHandler( GUI::m_scrolledWindow1OnLeftDClick ), NULL, this );
+	m_buttonHistogram->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GUI::m_buttonHistogramOnButtonClick ), NULL, this );
 }
 
 GUI::~GUI()
@@ -95,5 +147,6 @@ GUI::~GUI()
 	// Disconnect Events
 	this->Disconnect( wxEVT_UPDATE_UI, wxUpdateUIEventHandler( GUI::GUIOnUpdateUI ) );
 	m_scrolledWindow1->Disconnect( wxEVT_LEFT_DCLICK, wxMouseEventHandler( GUI::m_scrolledWindow1OnLeftDClick ), NULL, this );
+	m_buttonHistogram->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GUI::m_buttonHistogramOnButtonClick ), NULL, this );
 
 }

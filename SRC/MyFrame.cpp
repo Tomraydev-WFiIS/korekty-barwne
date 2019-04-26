@@ -10,12 +10,13 @@
 #include <wx/image.h>
 #include <wx/dcbuffer.h>
 
+
 MyFrame::MyFrame(wxWindow* parent) : GUI(parent) {
 	wxImage::AddHandler(new wxJPEGHandler);
 	wxImage::AddHandler(new wxPNGHandler);
 
 	wxImage image;
-	if (!image.LoadFile(wxString("..\\img\\placeholder.png"))) {
+	if (!image.LoadFile(wxString("..\\img\\lena.png"))) {
 		wxMessageBox(_("Nie uda\u0142o si\u0119 za\u0142adowa\u0107 obrazka"));
 		Destroy();
 		return;
@@ -41,6 +42,7 @@ MyFrame::MyFrame(wxWindow* parent) : GUI(parent) {
 void MyFrame::GUIOnUpdateUI(wxUpdateUIEvent& event) {
 	Repaint();
 }
+
 
 void MyFrame::m_fileOpenOnMenuSelection(wxCommandEvent& event) {
 	wxFileDialog
@@ -99,6 +101,7 @@ void MyFrame::m_fileSaveAsOnMenuSelection(wxCommandEvent& event) {
 }
 
 void MyFrame::Repaint(void) {
+	//Paint images
 	wxClientDC dc_1(m_scrolledWindow1);
 	wxClientDC dc_2(m_scrolledWindow2);
 	wxBufferedDC dc1(&dc_1);
@@ -109,6 +112,8 @@ void MyFrame::Repaint(void) {
 	dc2.Clear();
 	dc1.DrawBitmap(bitMapOld, 0, 0, true);
 	dc2.DrawBitmap(bitMapNew, 0, 0, true);
+	//Paint histograms
+	if(histogramsGenerated) paintHistograms();
 	return;
 }
 
@@ -143,3 +148,103 @@ void MyFrame::m_scrolledWindow1OnLeftDClick(wxMouseEvent& event) {
 	SetStatusText(wxT("Clicked " + std::to_string(x) + ", " + std::to_string(y) + " Color: " + color ), 0);
 	return;
 }
+
+void MyFrame::m_buttonHistogramOnButtonClick(wxCommandEvent& event) {
+	//***** Calculating the histograms *****
+	int rgb_count[256] = { 0 };
+	int r_count[256]  = { 0 };
+	int g_count[256]  = { 0 };
+	int b_count[256]  = { 0 };
+	int rgb_count_n[256] = { 0 };
+	int r_count_n[256] = { 0 };
+	int g_count_n[256] = { 0 };
+	int b_count_n[256] = { 0 };
+
+	calculateHistograms(imgOld, rgb_count, r_count, g_count, b_count);
+	calculateHistograms(imgNew, rgb_count_n, r_count_n, g_count_n, b_count_n);
+	
+	//***** Creating the histogram images *****
+	generate_hist_img(imgHistogramRGB, bitMapHistogramRGB, rgb_count, 0x00, 0x00, 0x00);
+	generate_hist_img(imgHistogramR, bitMapHistogramR, r_count, 0xff, 0x00, 0x00);
+	generate_hist_img(imgHistogramG, bitMapHistogramG, g_count, 0x00, 0xff, 0x00);
+	generate_hist_img(imgHistogramB, bitMapHistogramB, b_count, 0x00, 0x00, 0xff);
+
+	generate_hist_img(imgHistogramRGB_n, bitMapHistogramRGB_n, rgb_count_n, 0x00, 0x00, 0x00);
+	generate_hist_img(imgHistogramR_n, bitMapHistogramR_n, r_count_n, 0xff, 0x00, 0x00);
+	generate_hist_img(imgHistogramG_n, bitMapHistogramG_n, g_count_n, 0x00, 0xff, 0x00);
+	generate_hist_img(imgHistogramB_n, bitMapHistogramB_n, b_count_n, 0x00, 0x00, 0xff);
+	//***** Drawing the histogram images *****
+	histogramsGenerated = true;
+	paintHistograms();
+	SetStatusText(wxT("Generated old and new histograms"), 0);
+	return;
+}
+
+void MyFrame::paintHistograms(void) {
+	int margin = 5;
+	wxClientDC dc_1(m_panel_hist_old);
+	wxClientDC dc_2(m_panel_hist_new);
+	wxBufferedDC dc1(&dc_1);
+	wxBufferedDC dc2(&dc_2);
+	dc1.Clear();
+	dc2.Clear();
+	dc1.DrawBitmap(bitMapHistogramRGB, 0, 0, true);
+	dc1.DrawBitmap(bitMapHistogramR, 0, 100 + margin, true);
+	dc1.DrawBitmap(bitMapHistogramG, 0, 2 * (100 + margin), true);
+	dc1.DrawBitmap(bitMapHistogramB, 0, 3 * (100 + margin), true);
+
+	dc2.DrawBitmap(bitMapHistogramRGB_n, 0, 0, true);
+	dc2.DrawBitmap(bitMapHistogramR_n, 0, 100 + margin, true);
+	dc2.DrawBitmap(bitMapHistogramG_n, 0, 2 * (100 + margin), true);
+	dc2.DrawBitmap(bitMapHistogramB_n, 0, 3 * (100 + margin), true);
+	return;
+}
+
+void MyFrame::calculateHistograms(wxImage &img, int rgb_count[256], int r_count[256], int g_count[256], int b_count[256]) {
+	unsigned char *pixels = img.GetData();
+	int w = img.GetWidth();
+	int h = img.GetHeight();
+	for (int y = 0; y < h; y++) {
+		for (int x = 0; x < w; x++) {
+			int r = pixels[3 * (y*w + x)];
+			int g = pixels[3 * (y*w + x) + 1];
+			int b = pixels[3 * (y*w + x) + 2];
+			rgb_count[(r + g + b) / 3]++;
+			r_count[r]++;
+			g_count[g]++;
+			b_count[b]++;
+		}
+	}
+}
+
+void MyFrame::generate_hist_img(wxImage &img, wxBitmap &bitmap, int count[256], int r, int g, int b) {
+	int hist_max = 1;
+	for (int i = 0; i < 256; i++) {
+		if (count[i] > hist_max) {
+			hist_max = count[i];
+		}
+	}
+	for (int i = 0; i < 256; i++) {
+		count[i] = (100 * count[i]) / hist_max;
+	}
+	unsigned char hist_pixels[100 * 256 * 3];
+	for (int i = 0; i < 100 * 256 * 3; i++) {
+		hist_pixels[i] = 0xff;
+	}
+	for (int x = 0; x < 256; x++) {
+		for (int y = 0; y < count[x]; y++) {
+			hist_pixels[3 * ((99 - y) * 256 + x)] = r;
+			hist_pixels[3 * ((99 - y) * 256 + x) + 1] = g;
+			hist_pixels[3 * ((99 - y) * 256 + x) + 2] = b;
+		}
+	}
+	img = wxImage(256, 100, hist_pixels, true);
+	bitmap = wxBitmap(img);
+}
+
+
+//PISANIE DO KONSOLI W VS
+/*for (int i = 0; i < 256; i++) {
+		auto str = L"count[" + std::to_string(i) + "] = " + std::to_string(count[i]) + "\n";
+		OutputDebugString(str);
+	}*/

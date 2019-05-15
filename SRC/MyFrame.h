@@ -1,15 +1,30 @@
 #pragma once
 #include "GUI.h"
+#include "MyBrightnessSaturationContrastDialog.h"
 #include <wx/dcbuffer.h>
 #include <wx/filedlg.h>
+#include <cmath>
+
+float findMin(float x, float y, float z = 999999.9);
+float findMax(float x, float y, float z = 0.0);
 
 class MyFrame : public GUI {
+	friend MyBrightnessSaturationContrastDialog;
 protected:
 	// Event handlers (copy from GUI.h and override)
 	void m_fileOpenOnMenuSelection(wxCommandEvent& event);
 	void m_fileSaveAsOnMenuSelection(wxCommandEvent& event);
 	void GUIOnUpdateUI(wxUpdateUIEvent& event);
 	void m_ViewStatusBarOnMenuSelection(wxCommandEvent& event);
+
+	// Brightness, Saturation and Contrast
+	void m_ViewBrightnessSaturationContrastWindowOnMenuSelection(wxCommandEvent& event);
+	void setBrightness(int value, int valueMin, int valueMax);
+	void setSaturation(int value, int valueMin, int valueMax);
+	void setContrast(int value, int valueMin, int valueMax);
+
+	
+
 	void m_scrolledWindow1OnLeftDClick(wxMouseEvent& event);
 	void m_buttonHistogramOnButtonClick(wxCommandEvent& event);
 	
@@ -19,11 +34,17 @@ protected:
 	void calculateHistograms(wxImage &img, int rgb_count[256], int r_count[256], int g_count[256], int b_count[256]);
 public:
 	MyFrame(wxWindow* parent);
+	~MyFrame();
 	wxImage imgOld;
 	wxImage imgNew;
 	wxBitmap bitMapOld;
 	wxBitmap bitMapNew;
 	wxColor pickedColor;
+
+	// Brightness and Saturation
+	bool showBrightnessSaturationContrastDialog = false;
+	MyBrightnessSaturationContrastDialog* brightnessDialog = nullptr;
+
 
 	//Histograms
 	bool histogramsGenerated = false;
@@ -45,3 +66,4 @@ public:
 	wxBitmap bitMapHistogramG_n;
 	wxBitmap bitMapHistogramB_n;
 };
+

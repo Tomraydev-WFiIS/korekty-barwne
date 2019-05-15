@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// C++ code generated with wxFormBuilder (version Mar 23 2019)
+// C++ code generated with wxFormBuilder (version Apr 17 2019)
 // http://www.wxformbuilder.org/
 //
 // PLEASE DO *NOT* EDIT THIS FILE!
@@ -59,6 +59,7 @@ class GUI : public wxFrame
 		virtual void m_fileOpenOnMenuSelection( wxCommandEvent& event ) { event.Skip(); }
 		virtual void m_fileSaveAsOnMenuSelection( wxCommandEvent& event ) { event.Skip(); }
 		virtual void m_ViewStatusBarOnMenuSelection( wxCommandEvent& event ) { event.Skip(); }
+		virtual void m_ViewBrightnessSaturationContrastWindowOnMenuSelection( wxCommandEvent& event ) { event.Skip(); }
 		virtual void m_scrolledWindow1OnLeftDClick( wxMouseEvent& event ) { event.Skip(); }
 		virtual void m_buttonHistogramOnButtonClick( wxCommandEvent& event ) { event.Skip(); }
 

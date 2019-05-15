@@ -11,6 +11,31 @@
 #include <wx/dcbuffer.h>
 
 
+
+float findMin(float x, float y, float z) {
+	float min;
+	if (x < y)
+		min = x;
+	else
+		min = y;
+	if (z < min)
+		min = z;
+	return min;
+}
+
+float findMax(float x, float y, float z) {
+	float max;
+	if (x > y)
+		max = x;
+	else
+		max = y;
+	if (z > max)
+		max = z;
+	return max;
+}
+
+
+
 MyFrame::MyFrame(wxWindow* parent) : GUI(parent) {
 	wxImage::AddHandler(new wxJPEGHandler);
 	wxImage::AddHandler(new wxPNGHandler);
@@ -37,6 +62,11 @@ MyFrame::MyFrame(wxWindow* parent) : GUI(parent) {
 
 	Repaint();
 	SetStatusText(wxT("Load an image to get started"), 0);
+
+}
+
+MyFrame::~MyFrame() {
+	delete brightnessDialog;
 }
 
 void MyFrame::GUIOnUpdateUI(wxUpdateUIEvent& event) {
@@ -126,6 +156,177 @@ void MyFrame::m_ViewStatusBarOnMenuSelection(wxCommandEvent& event) {
 		m_statusBar1->Enable();
 		m_statusBar1->Show(true);
 	}
+}
+
+void MyFrame::m_ViewBrightnessSaturationContrastWindowOnMenuSelection(wxCommandEvent& event)
+{
+	if (brightnessDialog == nullptr)
+		brightnessDialog = new MyBrightnessSaturationContrastDialog(this);
+	showBrightnessSaturationContrastDialog = !showBrightnessSaturationContrastDialog;
+	brightnessDialog->Show(showBrightnessSaturationContrastDialog);
+
+}
+void MyFrame::setBrightness(int value, int valueMin, int valueMax) {
+	value -= (valueMax + valueMin) / 2;
+	//auto str = L"Brightness value " + std::to_string(value) + "\n"; OutputDebugString(str);
+	wxImage imgCpy = imgOld.Copy();
+	unsigned int howManyPixels = 3 * imgCpy.GetHeight()*imgCpy.GetWidth();
+	unsigned char* picturePixel = imgCpy.GetData();
+
+	for (unsigned int i = 0; i < howManyPixels; i++)
+	{
+		int newValue = picturePixel[i] + value;
+		if (newValue < 0)
+			newValue = 0;
+		else if (newValue > 255)
+			newValue = 255;
+		picturePixel[i] = newValue;
+	}
+	imgNew = imgCpy.Copy();
+	wxBitmap bitmap(imgCpy);
+	bitMapNew = bitmap;
+	Repaint();
+}
+
+void MyFrame::setSaturation(int enteredValue, int valueMin, int valueMax) {
+	double value = (double)enteredValue / ( (valueMax + valueMin) / 2) - 1.0;
+	auto str = L"Saturation in percent " + std::to_string(value) + "\n"; OutputDebugString(str);
+	wxImage imgCpy = imgOld.Copy();
+	unsigned int howManyPixels = 3 * imgCpy.GetHeight()*imgCpy.GetWidth();
+	unsigned char* picturePixel = imgCpy.GetData();
+	
+	float hue, sat, val;
+	float x, f, i, p, q, t;
+	for (unsigned int k = 0; k < howManyPixels; k += 3)
+	{
+		// RGB to HSV
+		x = findMin(picturePixel[k], picturePixel[k + 1], picturePixel[k + 2]);
+		val = findMax(picturePixel[k], picturePixel[k + 1], picturePixel[k + 2]);
+		if (x == val)
+		{
+			hue = 0;
+			sat = 0;
+		}
+		else
+		{
+			if (picturePixel[k] == x)
+			{
+				f = picturePixel[k + 1] - picturePixel[k + 2];
+				i = 3.0;
+			}
+			else if (picturePixel[k + 1] == x)
+			{
+				f = picturePixel[k + 2] - picturePixel[k];
+				i = 5.0;
+			}
+			else
+			{
+				f = picturePixel[k] - picturePixel[k + 1];
+				i = 1.0;
+			}
+
+			hue = fmod((i - f / (val - x)) * 60, 360);
+			sat = ((val - x) / val);
+			
+			// change in saturation
+			if (value > 0)
+			{
+				sat += (1.0 - sat) * value;
+			}
+			else
+			{
+				sat += sat * value;
+			}
+
+			if (sat > 1.0)
+				sat = 1.0;
+			if (sat < 0.0)
+				sat = 0.0;
+
+			// HSV to RGB
+			if (val == 0)
+			{
+				picturePixel[k] = 0;
+				picturePixel[k + 1] = 0;
+				picturePixel[k + 2] = 0;
+			}
+			else
+			{
+				hue /= 60;
+				i = floor(hue);
+				f = hue - i;
+				p = val * (1 - sat);
+				q = val * (1 - (sat*f));
+				t = val * (1 - (sat*(1 - f)));
+				if (i == 0)
+				{
+					picturePixel[k] = val;
+					picturePixel[k + 1] = t;
+					picturePixel[k + 2] = p;
+				}
+				else if (i == 1)
+				{
+					picturePixel[k] = q;
+					picturePixel[k + 1] = val;
+					picturePixel[k + 2] = p;
+				}
+				else if (i == 2)
+				{
+					picturePixel[k] = p;
+					picturePixel[k + 1] = val;
+					picturePixel[k + 2] = t;
+				}
+				else if (i == 3)
+				{
+					picturePixel[k] = p;
+					picturePixel[k + 1] = q;
+					picturePixel[k + 2] = val;
+				}
+				else if (i == 4)
+				{
+					picturePixel[k] = t;
+					picturePixel[k + 1] = p;
+					picturePixel[k + 2] = val;
+				}
+				else if (i == 5)
+				{
+					picturePixel[k] = val;
+					picturePixel[k + 1] = p;
+					picturePixel[k + 2] = q;
+				}
+				
+			}
+
+		}
+	}
+	imgNew = imgCpy.Copy();
+	wxBitmap bitmap(imgCpy);
+	bitMapNew = bitmap;
+	Repaint();
+
+}
+
+void MyFrame::setContrast(int value, int valueMin, int valueMax) {
+	value -= (valueMax + valueMin) / 2;
+	//value /= 2;
+	wxImage imgCpy = imgOld.Copy();
+	unsigned int howManyPixels = 3 * imgCpy.GetHeight()*imgCpy.GetWidth();
+	unsigned char* picturePixel = imgCpy.GetData();
+	double contrast = (value + 256.0) / (257.0 - value);
+	
+	for (unsigned int i = 0; i < howManyPixels; i++)
+	{
+		int newValue = (picturePixel[i] - (255.0 / 2.0)) * contrast + 255.0 / 2.0;
+		if (newValue < 0)
+			newValue = 0;
+		else if (newValue > 255)
+			newValue = 255;
+		picturePixel[i] = newValue;
+	}
+	imgNew = imgCpy.Copy();
+	wxBitmap bitmap(imgCpy);
+	bitMapNew = bitmap;
+	Repaint();
 }
 
 void MyFrame::m_scrolledWindow1OnLeftDClick(wxMouseEvent& event) {
@@ -248,3 +449,5 @@ void MyFrame::generate_hist_img(wxImage &img, wxBitmap &bitmap, int count[256], 
 		auto str = L"count[" + std::to_string(i) + "] = " + std::to_string(count[i]) + "\n";
 		OutputDebugString(str);
 	}*/
+
+

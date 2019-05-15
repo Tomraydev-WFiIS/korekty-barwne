@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// C++ code generated with wxFormBuilder (version Mar 23 2019)
+// C++ code generated with wxFormBuilder (version Apr 17 2019)
 // http://www.wxformbuilder.org/
 //
 // PLEASE DO *NOT* EDIT THIS FILE!
@@ -30,6 +30,10 @@ GUI::GUI( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint&
 	m_ViewStatusBar = new wxMenuItem( m_menuView, wxID_ANY, wxString( wxT("Status Bar") ) , wxEmptyString, wxITEM_CHECK );
 	m_menuView->Append( m_ViewStatusBar );
 	m_ViewStatusBar->Check( true );
+
+	wxMenuItem* m_ViewBrightnessSaturationContrastWindow;
+	m_ViewBrightnessSaturationContrastWindow = new wxMenuItem( m_menuView, wxID_ANY, wxString( wxT("Brightness, Saturation, Contrast") ) , wxEmptyString, wxITEM_CHECK );
+	m_menuView->Append( m_ViewBrightnessSaturationContrastWindow );
 
 	m_menuBarTop->Append( m_menuView, wxT("View") );
 
@@ -138,6 +142,7 @@ GUI::GUI( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint&
 	m_menuFile->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUI::m_fileOpenOnMenuSelection ), this, m_fileOpen->GetId());
 	m_menuFile->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUI::m_fileSaveAsOnMenuSelection ), this, m_fileSaveAs->GetId());
 	m_menuView->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUI::m_ViewStatusBarOnMenuSelection ), this, m_ViewStatusBar->GetId());
+	m_menuView->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUI::m_ViewBrightnessSaturationContrastWindowOnMenuSelection ), this, m_ViewBrightnessSaturationContrastWindow->GetId());
 	m_scrolledWindow1->Connect( wxEVT_LEFT_DCLICK, wxMouseEventHandler( GUI::m_scrolledWindow1OnLeftDClick ), NULL, this );
 	m_buttonHistogram->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GUI::m_buttonHistogramOnButtonClick ), NULL, this );
 }

@@ -23,6 +23,7 @@
 #include <wx/panel.h>
 #include <wx/notebook.h>
 #include <wx/button.h>
+#include <wx/stattext.h>
 #include <wx/grid.h>
 #include <wx/statusbr.h>
 #include <wx/frame.h>
@@ -44,7 +45,12 @@ class GUI : public wxFrame
 		wxScrolledWindow* m_scrolledWindow1;
 		wxScrolledWindow* m_scrolledWindow2;
 		wxNotebook* m_notebook1;
+		
+		//Hexagon
 		wxPanel* m_panel_hexagon;
+		wxBoxSizer* m_panel_hexagon_sizer;
+		//////////////////////////////////
+
 		wxPanel* m_panel_histograms;
 		wxNotebook* m_notebook4;
 		wxPanel* m_panel_hist_old;

@@ -34,11 +34,36 @@ float findMax(float x, float y, float z) {
 	return max;
 }
 
-
-
 MyFrame::MyFrame(wxWindow* parent) : GUI(parent) {
 	wxImage::AddHandler(new wxJPEGHandler);
 	wxImage::AddHandler(new wxPNGHandler);
+
+	//Hexagon
+	colorFromHexagonTxt = new wxStaticText(m_panel_hexagon, wxID_ANY, wxT("COLOR ON WHICH WE CHANGE"), wxDefaultPosition, wxDefaultSize, 0);
+	this->hexagon = new ColorsHexagon(m_panel_hexagon, colorFromHexagonTxt, hexagonColor);
+	m_panel_hexagon_sizer->Add(this->hexagon);
+	
+	m_propText = new wxStaticText(m_panel_hexagon, wxID_ANY, wxT("Correction strength: 100%"), wxDefaultPosition, wxDefaultSize, 0);
+	m_propText->Wrap(-1);
+	m_panel_hexagon_sizer->Add(m_propText, 0, wxALL, 5);
+
+	m_propSlider = new wxSlider(m_panel_hexagon, wxID_ANY, 50, 0, 100, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+	m_propSlider->SetValue(100);
+	m_propSlider->Connect(wxEVT_SCROLL_CHANGED, wxScrollEventHandler(MyFrame::changePropSlider), NULL, this);
+	m_panel_hexagon_sizer->Add(m_propSlider, 0, wxALL, 5);
+	
+	colorFromImageTxt = new wxStaticText(m_panel_hexagon, wxID_ANY, wxT("COLOR TO CHANGE"), wxDefaultPosition, wxDefaultSize, 0);
+	colorFromImageTxt->Wrap(-1);
+	m_panel_hexagon_sizer->Add(colorFromImageTxt, 0, wxALL, 5);
+
+	colorFromHexagonTxt->Wrap(-1);
+	m_panel_hexagon_sizer->Add(colorFromHexagonTxt, 0, wxALL, 5);
+
+	hexagonButton = new wxButton(m_panel_hexagon, wxID_ANY, wxT("CHANGE PIXELS COLOR"), wxDefaultPosition, wxDefaultSize, 0);
+	hexagonButton->Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MyFrame::m_clickHexagonButton), NULL, this);
+	m_panel_hexagon_sizer->Add(hexagonButton, 0, wxALL, 5);
+
+	///////////////////////////////////////////////////////////////////////
 
 	wxImage image;
 	if (!image.LoadFile(wxString("..\\img\\lena.png"))) {
@@ -111,6 +136,40 @@ void MyFrame::m_fileOpenOnMenuSelection(wxCommandEvent& event) {
 	Repaint();
 	SetStatusText(wxT("Loaded file: " + fileName), 0);
 }
+
+void MyFrame::changePixelsAlgo() {
+	wxImage processImage = this->imgOld.Copy();
+
+	for (int i = 0; i < processImage.GetWidth(); i++) {
+		for (int j = 0; j < processImage.GetHeight(); j++) {
+			wxColor pixelColor = wxColor(processImage.GetRed(i, j), processImage.GetGreen(i, j), processImage.GetBlue(i, j));
+
+			//zamiana zaznaczonego koloru
+			if (pixelColor == pickedColor) {
+				//wxMessageBox(_("NO ELO"));
+				processImage.SetRGB(i, j, hexagonColor->Red(), hexagonColor->Green(), hexagonColor->Blue());
+			} else {
+				//modyfikacja pozostalych pikseli w zaleznosci od wsp proporcjonalnosci...
+			}
+		}
+	}
+
+	this->bitMapOld = wxBitmap(processImage);
+	this->Refresh();
+}
+
+void  MyFrame::m_clickHexagonButton(wxCommandEvent& event) {
+	changePixelsAlgo();
+}
+
+void MyFrame::changePropSlider(wxScrollEvent& event) {
+	int value = this->m_propSlider->GetValue();
+	wxString str = "Correction strength: ";
+	str.Append(wxString::Format(wxT("%i"), value));
+	str.Append("%");
+	this->m_propText->SetLabelText(str);
+}
+
 void MyFrame::m_fileSaveAsOnMenuSelection(wxCommandEvent& event) {
 	wxImage image = imgNew;
 	wxFileDialog
@@ -345,6 +404,9 @@ void MyFrame::m_scrolledWindow1OnLeftDClick(wxMouseEvent& event) {
 
 	pickedColor = wxColor(pixels[3*(y*w + x)], pixels[3*(y*w + x) + 1], pixels[3*(y*w + x) + 2]);
 	std::string color = std::to_string(pickedColor.Red() ) + ", " + std::to_string(pickedColor.Green()) + ", " + std::to_string(pickedColor.Blue());
+	colorFromImageTxt->SetForegroundColour(pickedColor);
+	colorFromImageTxt->Refresh();
+	hexagon->setSelectedColor(pickedColor);
 
 	SetStatusText(wxT("Clicked " + std::to_string(x) + ", " + std::to_string(y) + " Color: " + color ), 0);
 	return;

@@ -83,6 +83,10 @@ GUI::GUI( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint&
 	m_buttonHistogram = new wxButton( m_panel_histograms, wxID_ANY, wxT("Generate Histograms"), wxDefaultPosition, wxDefaultSize, 0 );
 	bSizer2->Add( m_buttonHistogram, 0, wxALL|wxALIGN_CENTER_HORIZONTAL, 5 );
 
+	///////////////////// Hexagon /////////////////////////
+	m_panel_hexagon_sizer = new wxBoxSizer(wxVERTICAL);
+	m_panel_hexagon->SetSizer(m_panel_hexagon_sizer);
+	////////////////////////////////////////////////////////
 
 	m_panel_histograms->SetSizer( bSizer2 );
 	m_panel_histograms->Layout();

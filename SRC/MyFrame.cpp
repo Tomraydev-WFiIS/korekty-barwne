@@ -10,7 +10,11 @@
 #include <wx/image.h>
 #include <wx/dcbuffer.h>
 
-
+int colorHelper(int value) {
+	if (value > 255) return 255;
+	else if (value < 0) return 0;
+	else return value;
+}
 
 float findMin(float x, float y, float z) {
 	float min;
@@ -43,12 +47,12 @@ MyFrame::MyFrame(wxWindow* parent) : GUI(parent) {
 	this->hexagon = new ColorsHexagon(m_panel_hexagon, colorFromHexagonTxt, hexagonColor);
 	m_panel_hexagon_sizer->Add(this->hexagon);
 	
-	m_propText = new wxStaticText(m_panel_hexagon, wxID_ANY, wxT("Correction strength: 100%"), wxDefaultPosition, wxDefaultSize, 0);
+	m_propText = new wxStaticText(m_panel_hexagon, wxID_ANY, wxT("Correction strength: 0%"), wxDefaultPosition, wxDefaultSize, 0);
 	m_propText->Wrap(-1);
 	m_panel_hexagon_sizer->Add(m_propText, 0, wxALL, 5);
 
 	m_propSlider = new wxSlider(m_panel_hexagon, wxID_ANY, 50, 0, 100, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_propSlider->SetValue(100);
+	m_propSlider->SetValue(0);
 	m_propSlider->Connect(wxEVT_SCROLL_CHANGED, wxScrollEventHandler(MyFrame::changePropSlider), NULL, this);
 	m_panel_hexagon_sizer->Add(m_propSlider, 0, wxALL, 5);
 	
@@ -144,12 +148,16 @@ void MyFrame::changePixelsAlgo() {
 		for (int j = 0; j < processImage.GetHeight(); j++) {
 			wxColor pixelColor = wxColor(processImage.GetRed(i, j), processImage.GetGreen(i, j), processImage.GetBlue(i, j));
 
-			//zamiana zaznaczonego koloru
 			if (pixelColor == pickedColor) {
-				//wxMessageBox(_("NO ELO"));
 				processImage.SetRGB(i, j, hexagonColor->Red(), hexagonColor->Green(), hexagonColor->Blue());
 			} else {
-				//modyfikacja pozostalych pikseli w zaleznosci od wsp proporcjonalnosci...
+				int ratio = this->m_propSlider->GetValue();
+
+				int new_r = colorHelper(pixelColor.Red() * (100 - ratio)/100 + pickedColor.Red() * ratio/100);
+				int new_g = colorHelper(pixelColor.Green() * (100 - ratio)/100 + pickedColor.Green() * ratio/100);
+				int new_b = colorHelper(pixelColor.Blue() * (100 - ratio)/100 + pickedColor.Blue() * ratio/100);
+
+				processImage.SetRGB(i, j, new_r, new_g, new_b);
 			}
 		}
 	}
@@ -406,7 +414,32 @@ void MyFrame::m_scrolledWindow1OnLeftDClick(wxMouseEvent& event) {
 	std::string color = std::to_string(pickedColor.Red() ) + ", " + std::to_string(pickedColor.Green()) + ", " + std::to_string(pickedColor.Blue());
 	colorFromImageTxt->SetForegroundColour(pickedColor);
 	colorFromImageTxt->Refresh();
-	hexagon->setSelectedColor(pickedColor);
+
+	//modify color
+	int r = pickedColor.Red();
+	int g = pickedColor.Green();
+	int b = pickedColor.Blue();
+
+	int max_value;
+	if (g >= r && g >= b) {
+		max_value = g/255;
+		g = 255;
+		r *= max_value;
+		b *= max_value;
+	}else if (b >= g && b >= r) {
+		max_value = b/255;
+		b = 255;
+		r *= max_value;
+		g *= max_value;
+	} else {
+		max_value = r/255;
+		r = 255;
+		g *= max_value;
+		b *= max_value;
+	}
+	
+	wxColour modified_color(r, g, b);
+	hexagon->setSelectedColor(modified_color);
 
 	SetStatusText(wxT("Clicked " + std::to_string(x) + ", " + std::to_string(y) + " Color: " + color ), 0);
 	return;

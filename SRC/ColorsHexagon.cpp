@@ -41,9 +41,7 @@ ColorsHexagon::ColorsHexagon(wxPanel* parent, wxControl * control, wxColor * col
 	}
 }
 
-ColorsHexagon::~ColorsHexagon() {
-	//this->areaImage.Clear();
-}
+ColorsHexagon::~ColorsHexagon() {}
 
 void ColorsHexagon::paintEvent(wxPaintEvent & evt)
 {
@@ -102,8 +100,8 @@ void ColorsHexagon::paintEvent(wxPaintEvent & evt)
 	constRedHexagon = constRedHexagon.Rotate(angle * 45, wxPoint(50, 50));
 	constRedHexagon = constRedHexagon.Scale(145, 85);
 
-	wxBitmap map = wxBitmap(this->areaImage);
-	memDC.SelectObject(map);
+	areaMap = wxBitmap(this->areaImage);
+	memDC.SelectObject(areaMap);
 	memDC.DrawBitmap(wxBitmap(constRedHexagon), 28, 7, true);
 	memDC.DrawBitmap(wxBitmap(constGreenHexagon), 100, 20, true);
 	memDC.DrawBitmap(wxBitmap(constBlueHexagon), 30, 50, true);
@@ -147,11 +145,45 @@ wxColor ColorsHexagon::getSelectedColor() {
 }
 
 void ColorsHexagon::setSelectedColor(const wxColor &color) { 
+	wxImage tmpImage = areaMap.ConvertToImage();
+
 	for (int i = 0; i < hexagonWidth; i++) {
 		for (int j = 0; j < hexagonHeight; j++) {
-			wxColor tmp(this->areaImage.GetRed(i, j), this->areaImage.GetGreen(i, j), this->areaImage.GetBlue(i, j));
+			wxColor tmp(tmpImage.GetRed(i, j), tmpImage.GetGreen(i, j), tmpImage.GetBlue(i, j));
+			if (tmp == color 
+				|| (abs(tmp.Red() - color.Red()) < 10 
+					&& (abs(tmp.Green() - color.Green())) < 10
+					&& (abs(tmp.Blue() - color.Blue())) < 10)) {
+				setPointerPosition(i, j);
+				this->selectedColor = color;
+				this->Refresh();
+				break;
+			}
+		}
+	}
 
-			if (tmp == color) {
+	for (int i = 0; i < hexagonWidth; i++) {
+		for (int j = 0; j < hexagonHeight; j++) {
+			wxColor tmp(tmpImage.GetRed(i, j), tmpImage.GetGreen(i, j), tmpImage.GetBlue(i, j));
+			if (tmp == color
+				|| (abs(tmp.Red() - color.Red()) < 30
+					&& (abs(tmp.Green() - color.Green())) < 30
+					&& (abs(tmp.Blue() - color.Blue())) < 30)) {
+				setPointerPosition(i, j);
+				this->selectedColor = color;
+				this->Refresh();
+				break;
+			}
+		}
+	}
+
+	for (int i = 0; i < hexagonWidth; i++) {
+		for (int j = 0; j < hexagonHeight; j++) {
+			wxColor tmp(tmpImage.GetRed(i, j), tmpImage.GetGreen(i, j), tmpImage.GetBlue(i, j));
+			if (tmp == color
+				|| (abs(tmp.Red() - color.Red()) < 60
+					&& (abs(tmp.Green() - color.Green())) < 60
+					&& (abs(tmp.Blue() - color.Blue())) < 60)) {
 				setPointerPosition(i, j);
 				this->selectedColor = color;
 				this->Refresh();

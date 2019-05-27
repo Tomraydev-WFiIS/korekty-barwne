@@ -13,6 +13,7 @@ class ColorsHexagon : public wxPanel {
 	wxWindow * parent;
 	wxWindowDC * windowDC;
 	wxImage areaImage;
+	wxBitmap areaMap;
 
 	//small hack
 	wxControl * reactControl;

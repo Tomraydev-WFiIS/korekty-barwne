@@ -142,7 +142,7 @@ void MyFrame::m_fileOpenOnMenuSelection(wxCommandEvent& event) {
 }
 
 void MyFrame::changePixelsAlgo() {
-	wxImage processImage = this->imgOld.Copy();
+	wxImage processImage = this->imgNew.Copy();
 
 	for (int i = 0; i < processImage.GetWidth(); i++) {
 		for (int j = 0; j < processImage.GetHeight(); j++) {
@@ -162,7 +162,7 @@ void MyFrame::changePixelsAlgo() {
 		}
 	}
 
-	this->bitMapOld = wxBitmap(processImage);
+	this->bitMapNew = wxBitmap(processImage);
 	this->Refresh();
 }
 

@@ -43,6 +43,7 @@ public:
 	MyFrame(wxWindow* parent);
 	~MyFrame();
 	wxImage imgOld;
+	wxImage imgToBSC;
 	wxImage imgNew;
 	wxBitmap bitMapOld;
 	wxBitmap bitMapNew;

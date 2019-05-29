@@ -79,6 +79,7 @@ MyFrame::MyFrame(wxWindow* parent) : GUI(parent) {
 	else {
 		imgOld = image.Copy();
 		imgNew = imgOld.Copy();
+		imgToBSC = imgOld.Copy();
 	}
 
 	wxSize size = image.GetSize();
@@ -164,6 +165,7 @@ void MyFrame::changePixelsAlgo() {
 	}
 
 	this->bitMapNew = wxBitmap(processImage);
+	this->imgToBSC = processImage.Copy();
 	this->Refresh();
 }
 
@@ -237,7 +239,7 @@ void MyFrame::m_ViewBrightnessSaturationContrastWindowOnMenuSelection(wxCommandE
 void MyFrame::setBrightness(int value, int valueMin, int valueMax, bool firstChange) {
 	value -= (valueMax + valueMin) / 2;
 	//auto str = L"Brightness value " + std::to_string(value) + "\n"; OutputDebugString(str);
-	wxImage imgCpy = imgOld.Copy();;
+	wxImage imgCpy = imgToBSC.Copy();;
 	if(firstChange == false)
 		imgCpy = imgNew.Copy();
 	unsigned int howManyPixels = 3 * imgCpy.GetHeight()*imgCpy.GetWidth();
@@ -261,7 +263,7 @@ void MyFrame::setBrightness(int value, int valueMin, int valueMax, bool firstCha
 void MyFrame::setSaturation(int enteredValue, int valueMin, int valueMax, bool firstChange) {
 	double value = (double)enteredValue / ( (valueMax + valueMin) / 2) - 1.0;
 	auto str = L"Saturation in percent " + std::to_string(value) + "\n"; OutputDebugString(str);
-	wxImage imgCpy = imgOld.Copy();;
+	wxImage imgCpy = imgToBSC.Copy();;
 	if (firstChange == false)
 		imgCpy = imgNew.Copy();
 	unsigned int howManyPixels = 3 * imgCpy.GetHeight()*imgCpy.GetWidth();
@@ -381,7 +383,7 @@ void MyFrame::setSaturation(int enteredValue, int valueMin, int valueMax, bool f
 void MyFrame::setContrast(int value, int valueMin, int valueMax, bool firstChange) {
 	value -= (valueMax + valueMin) / 2;
 	//value /= 2;
-	wxImage imgCpy = imgOld.Copy();;
+	wxImage imgCpy = imgToBSC.Copy();;
 	if (firstChange == false)
 		imgCpy = imgNew.Copy();
 	unsigned int howManyPixels = 3 * imgCpy.GetHeight()*imgCpy.GetWidth();

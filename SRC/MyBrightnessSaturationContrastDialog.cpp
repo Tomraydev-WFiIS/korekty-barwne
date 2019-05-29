@@ -11,30 +11,56 @@
 #include <wx/image.h>
 #include <wx/dcbuffer.h>
 
+
 void MyBrightnessSaturationContrastDialog::OnScrollingBrightness(wxScrollEvent& event) {
 	double value = m_BrightnessScrollBar->GetValue();
-	static_cast<MyFrame*>(GetParent())->setBrightness(value, m_BrightnessScrollBar->GetMin(), m_BrightnessScrollBar->GetMax());
+	brightnessValue = value;
+	static_cast<MyFrame*>(GetParent())->setBrightness(brightnessValue, m_BrightnessScrollBar->GetMin(), m_BrightnessScrollBar->GetMax());
+
+	static_cast<MyFrame*>(GetParent())->setSaturation(saturationValue, m_SaturationScrollBar->GetMin(), m_SaturationScrollBar->GetMax(), false);
+	static_cast<MyFrame*>(GetParent())->setContrast(contrastValue, m_ContrastScrollBar->GetMin(), m_ContrastScrollBar->GetMax(), false);
 
 	value = (value - m_BrightnessScrollBar->GetMin()) / (m_BrightnessScrollBar->GetMax() - m_BrightnessScrollBar->GetMin());
 	value = value * (m_BrightnessSetOnEnter->GetMax() - m_BrightnessSetOnEnter->GetMin()) + m_BrightnessSetOnEnter->GetMin();
+	
 	m_BrightnessSetOnEnter->SetValue(value);
+	
+	static_cast<MyFrame*>(GetParent())->Repaint();
+
 }
 
 void MyBrightnessSaturationContrastDialog::OnScrollingSaturation(wxScrollEvent& event) {
 	double value = m_SaturationScrollBar->GetValue();
-	static_cast<MyFrame*>(GetParent())->setSaturation(value, m_SaturationScrollBar->GetMin(), m_SaturationScrollBar->GetMax());
+	saturationValue = value;
+	static_cast<MyFrame*>(GetParent())->setSaturation(saturationValue, m_SaturationScrollBar->GetMin(), m_SaturationScrollBar->GetMax());
+
+	static_cast<MyFrame*>(GetParent())->setBrightness(brightnessValue, m_BrightnessScrollBar->GetMin(), m_BrightnessScrollBar->GetMax(), false);
+	static_cast<MyFrame*>(GetParent())->setContrast(contrastValue, m_ContrastScrollBar->GetMin(), m_ContrastScrollBar->GetMax(), false);
+
 
 	value = (value - m_SaturationScrollBar->GetMin()) / (m_SaturationScrollBar->GetMax() - m_SaturationScrollBar->GetMin());
 	value = value * (m_SaturationSetOnEnter->GetMax() - m_SaturationSetOnEnter->GetMin()) + m_SaturationSetOnEnter->GetMin();
+	
 	m_SaturationSetOnEnter->SetValue(value);
+		
+	static_cast<MyFrame*>(GetParent())->Repaint();
 }
 
 void MyBrightnessSaturationContrastDialog::OnScrollingContrast(wxScrollEvent& event) {
 	double value = m_ContrastScrollBar->GetValue();
-	static_cast<MyFrame*>(GetParent())->setContrast(value, m_ContrastScrollBar->GetMin(), m_ContrastScrollBar->GetMax());
+	contrastValue = value;
+	static_cast<MyFrame*>(GetParent())->setContrast(contrastValue, m_ContrastScrollBar->GetMin(), m_ContrastScrollBar->GetMax());
+
+	static_cast<MyFrame*>(GetParent())->setBrightness(brightnessValue, m_BrightnessScrollBar->GetMin(), m_BrightnessScrollBar->GetMax(), false);
+	static_cast<MyFrame*>(GetParent())->setSaturation(saturationValue, m_SaturationScrollBar->GetMin(), m_SaturationScrollBar->GetMax(), false);
+
+
 	value = (value - m_ContrastScrollBar->GetMin()) / (m_ContrastScrollBar->GetMax() - m_ContrastScrollBar->GetMin());
 	value = value * (m_ContrastSetOnEnter->GetMax() - m_ContrastSetOnEnter->GetMin()) + m_ContrastSetOnEnter->GetMin();
+	
 	m_ContrastSetOnEnter->SetValue(value);
+
+	static_cast<MyFrame*>(GetParent())->Repaint();
 }
 
 void MyBrightnessSaturationContrastDialog::BrightnessReset(wxCommandEvent& event) {

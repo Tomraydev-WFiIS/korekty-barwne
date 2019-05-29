@@ -32,7 +32,7 @@ GUI::GUI( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint&
 	m_ViewStatusBar->Check( true );
 
 	wxMenuItem* m_ViewBrightnessSaturationContrastWindow;
-	m_ViewBrightnessSaturationContrastWindow = new wxMenuItem( m_menuView, wxID_ANY, wxString( wxT("Brightness, Saturation, Contrast") ) , wxEmptyString, wxITEM_CHECK );
+	m_ViewBrightnessSaturationContrastWindow = new wxMenuItem( m_menuView, wxID_ANY, wxString( wxT("Brightness, Saturation, Contrast") ) , wxEmptyString, wxITEM_NORMAL );
 	m_menuView->Append( m_ViewBrightnessSaturationContrastWindow );
 
 	m_menuBarTop->Append( m_menuView, wxT("View") );
@@ -82,6 +82,11 @@ GUI::GUI( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint&
 
 	m_buttonHistogram = new wxButton( m_panel_histograms, wxID_ANY, wxT("Generate Histograms"), wxDefaultPosition, wxDefaultSize, 0 );
 	bSizer2->Add( m_buttonHistogram, 0, wxALL|wxALIGN_CENTER_HORIZONTAL, 5 );
+
+	///////////////////// Hexagon /////////////////////////
+	m_panel_hexagon_sizer = new wxBoxSizer(wxVERTICAL);
+	m_panel_hexagon->SetSizer(m_panel_hexagon_sizer);
+	////////////////////////////////////////////////////////
 
 
 	m_panel_histograms->SetSizer( bSizer2 );

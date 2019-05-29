@@ -62,7 +62,7 @@ class BrightnessSaturationContrastDialog : public wxDialog
 
 	public:
 
-		BrightnessSaturationContrastDialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Brightness Saturation & Contrast"), const wxPoint& pos = wxPoint( 100,600 ), const wxSize& size = wxSize( 441,135 ), long style = wxCAPTION|wxRESIZE_BORDER );
+		BrightnessSaturationContrastDialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Brightness Saturation & Contrast"), const wxPoint& pos = wxPoint( 100,600 ), const wxSize& size = wxSize( 441,135 ), long style = wxCAPTION|wxCLOSE_BOX|wxRESIZE_BORDER );
 		~BrightnessSaturationContrastDialog();
 
 };

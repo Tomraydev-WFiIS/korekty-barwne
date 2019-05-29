@@ -22,6 +22,15 @@ protected:
 	virtual void OnSpinSaturation(wxSpinEvent& event);
 	virtual void OnSpinContrast(wxSpinEvent& event);
 
+	int brightnessValue;
+	int saturationValue;
+	int contrastValue;
+
 public:
-	MyBrightnessSaturationContrastDialog(wxWindow* parent) : BrightnessSaturationContrastDialog(parent) {}
+	MyBrightnessSaturationContrastDialog(wxWindow* parent) : BrightnessSaturationContrastDialog(parent) {
+		brightnessValue = 256;
+		saturationValue = 256;
+		contrastValue = 256;
+	}
+
 };

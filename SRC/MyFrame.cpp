@@ -10,7 +10,11 @@
 #include <wx/image.h>
 #include <wx/dcbuffer.h>
 
-
+int colorHelper(int value) {
+	if (value > 255) return 255;
+	else if (value < 0) return 0;
+	else return value;
+}
 
 float findMin(float x, float y, float z) {
 	float min;
@@ -34,12 +38,38 @@ float findMax(float x, float y, float z) {
 	return max;
 }
 
-
-
 MyFrame::MyFrame(wxWindow* parent) : GUI(parent) {
 	wxImage::AddHandler(new wxJPEGHandler);
 	wxImage::AddHandler(new wxPNGHandler);
 
+	//Hexagon
+	colorFromHexagonTxt = new wxStaticText(m_panel_hexagon, wxID_ANY, wxT("COLOR ON WHICH WE CHANGE"), wxDefaultPosition, wxDefaultSize, 0);
+	this->hexagon = new ColorsHexagon(m_panel_hexagon, colorFromHexagonTxt, hexagonColor);
+	m_panel_hexagon_sizer->Add(this->hexagon);
+	
+	m_propText = new wxStaticText(m_panel_hexagon, wxID_ANY, wxT("Correction strength: 0%"), wxDefaultPosition, wxDefaultSize, 0);
+	m_propText->Wrap(-1);
+	m_panel_hexagon_sizer->Add(m_propText, 0, wxALL, 5);
+
+	m_propSlider = new wxSlider(m_panel_hexagon, wxID_ANY, 50, 0, 100, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+	m_propSlider->SetValue(0);
+	m_propSlider->Connect(wxEVT_SCROLL_CHANGED, wxScrollEventHandler(MyFrame::changePropSlider), NULL, this);
+	m_panel_hexagon_sizer->Add(m_propSlider, 0, wxALL, 5);
+	
+	colorFromImageTxt = new wxStaticText(m_panel_hexagon, wxID_ANY, wxT("COLOR TO CHANGE"), wxDefaultPosition, wxDefaultSize, 0);
+	colorFromImageTxt->Wrap(-1);
+	m_panel_hexagon_sizer->Add(colorFromImageTxt, 0, wxALL, 5);
+
+	colorFromHexagonTxt->Wrap(-1);
+	m_panel_hexagon_sizer->Add(colorFromHexagonTxt, 0, wxALL, 5);
+
+	hexagonButton = new wxButton(m_panel_hexagon, wxID_ANY, wxT("CHANGE PIXELS COLOR"), wxDefaultPosition, wxDefaultSize, 0);
+	hexagonButton->Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MyFrame::m_clickHexagonButton), NULL, this);
+	m_panel_hexagon_sizer->Add(hexagonButton, 0, wxALL, 5);
+
+	///////////////////////////////////////////////////////////////////////
+
+	
 	wxImage image;
 	if (!image.LoadFile(wxString("..\\img\\lena.png"))) {
 		wxMessageBox(_("Nie uda\u0142o si\u0119 za\u0142adowa\u0107 obrazka"));
@@ -111,6 +141,44 @@ void MyFrame::m_fileOpenOnMenuSelection(wxCommandEvent& event) {
 	Repaint();
 	SetStatusText(wxT("Loaded file: " + fileName), 0);
 }
+
+void MyFrame::changePixelsAlgo() {
+	wxImage processImage = this->imgNew.Copy();
+
+	for (int i = 0; i < processImage.GetWidth(); i++) {
+		for (int j = 0; j < processImage.GetHeight(); j++) {
+			wxColor pixelColor = wxColor(processImage.GetRed(i, j), processImage.GetGreen(i, j), processImage.GetBlue(i, j));
+
+			if (pixelColor == pickedColor) {
+				processImage.SetRGB(i, j, hexagonColor->Red(), hexagonColor->Green(), hexagonColor->Blue());
+			} else {
+				int ratio = this->m_propSlider->GetValue();
+
+				int new_r = colorHelper(pixelColor.Red() * (100 - ratio)/100 + pickedColor.Red() * ratio/100);
+				int new_g = colorHelper(pixelColor.Green() * (100 - ratio)/100 + pickedColor.Green() * ratio/100);
+				int new_b = colorHelper(pixelColor.Blue() * (100 - ratio)/100 + pickedColor.Blue() * ratio/100);
+
+				processImage.SetRGB(i, j, new_r, new_g, new_b);
+			}
+		}
+	}
+
+	this->bitMapNew = wxBitmap(processImage);
+	this->Refresh();
+}
+
+void  MyFrame::m_clickHexagonButton(wxCommandEvent& event) {
+	changePixelsAlgo();
+}
+
+void MyFrame::changePropSlider(wxScrollEvent& event) {
+	int value = this->m_propSlider->GetValue();
+	wxString str = "Correction strength: ";
+	str.Append(wxString::Format(wxT("%i"), value));
+	str.Append("%");
+	this->m_propText->SetLabelText(str);
+}
+
 void MyFrame::m_fileSaveAsOnMenuSelection(wxCommandEvent& event) {
 	wxImage image = imgNew;
 	wxFileDialog
@@ -166,10 +234,12 @@ void MyFrame::m_ViewBrightnessSaturationContrastWindowOnMenuSelection(wxCommandE
 	brightnessDialog->Show(showBrightnessSaturationContrastDialog);
 
 }
-void MyFrame::setBrightness(int value, int valueMin, int valueMax) {
+void MyFrame::setBrightness(int value, int valueMin, int valueMax, bool firstChange) {
 	value -= (valueMax + valueMin) / 2;
 	//auto str = L"Brightness value " + std::to_string(value) + "\n"; OutputDebugString(str);
-	wxImage imgCpy = imgOld.Copy();
+	wxImage imgCpy = imgOld.Copy();;
+	if(firstChange == false)
+		imgCpy = imgNew.Copy();
 	unsigned int howManyPixels = 3 * imgCpy.GetHeight()*imgCpy.GetWidth();
 	unsigned char* picturePixel = imgCpy.GetData();
 
@@ -185,13 +255,15 @@ void MyFrame::setBrightness(int value, int valueMin, int valueMax) {
 	imgNew = imgCpy.Copy();
 	wxBitmap bitmap(imgCpy);
 	bitMapNew = bitmap;
-	Repaint();
+	//Repaint();
 }
 
-void MyFrame::setSaturation(int enteredValue, int valueMin, int valueMax) {
+void MyFrame::setSaturation(int enteredValue, int valueMin, int valueMax, bool firstChange) {
 	double value = (double)enteredValue / ( (valueMax + valueMin) / 2) - 1.0;
 	auto str = L"Saturation in percent " + std::to_string(value) + "\n"; OutputDebugString(str);
-	wxImage imgCpy = imgOld.Copy();
+	wxImage imgCpy = imgOld.Copy();;
+	if (firstChange == false)
+		imgCpy = imgNew.Copy();
 	unsigned int howManyPixels = 3 * imgCpy.GetHeight()*imgCpy.GetWidth();
 	unsigned char* picturePixel = imgCpy.GetData();
 	
@@ -302,14 +374,16 @@ void MyFrame::setSaturation(int enteredValue, int valueMin, int valueMax) {
 	imgNew = imgCpy.Copy();
 	wxBitmap bitmap(imgCpy);
 	bitMapNew = bitmap;
-	Repaint();
+	//Repaint();
 
 }
 
-void MyFrame::setContrast(int value, int valueMin, int valueMax) {
+void MyFrame::setContrast(int value, int valueMin, int valueMax, bool firstChange) {
 	value -= (valueMax + valueMin) / 2;
 	//value /= 2;
-	wxImage imgCpy = imgOld.Copy();
+	wxImage imgCpy = imgOld.Copy();;
+	if (firstChange == false)
+		imgCpy = imgNew.Copy();
 	unsigned int howManyPixels = 3 * imgCpy.GetHeight()*imgCpy.GetWidth();
 	unsigned char* picturePixel = imgCpy.GetData();
 	double contrast = (value + 256.0) / (257.0 - value);
@@ -326,7 +400,7 @@ void MyFrame::setContrast(int value, int valueMin, int valueMax) {
 	imgNew = imgCpy.Copy();
 	wxBitmap bitmap(imgCpy);
 	bitMapNew = bitmap;
-	Repaint();
+	//Repaint();
 }
 
 void MyFrame::m_scrolledWindow1OnLeftDClick(wxMouseEvent& event) {
@@ -345,6 +419,34 @@ void MyFrame::m_scrolledWindow1OnLeftDClick(wxMouseEvent& event) {
 
 	pickedColor = wxColor(pixels[3*(y*w + x)], pixels[3*(y*w + x) + 1], pixels[3*(y*w + x) + 2]);
 	std::string color = std::to_string(pickedColor.Red() ) + ", " + std::to_string(pickedColor.Green()) + ", " + std::to_string(pickedColor.Blue());
+	colorFromImageTxt->SetForegroundColour(pickedColor);
+	colorFromImageTxt->Refresh();
+
+	//modify color
+	int r = pickedColor.Red();
+	int g = pickedColor.Green();
+	int b = pickedColor.Blue();
+
+	int max_value;
+	if (g >= r && g >= b) {
+		max_value = g/255;
+		g = 255;
+		r *= max_value;
+		b *= max_value;
+	}else if (b >= g && b >= r) {
+		max_value = b/255;
+		b = 255;
+		r *= max_value;
+		g *= max_value;
+	} else {
+		max_value = r/255;
+		r = 255;
+		g *= max_value;
+		b *= max_value;
+	}
+	
+	wxColour modified_color(r, g, b);
+	hexagon->setSelectedColor(modified_color);
 
 	SetStatusText(wxT("Clicked " + std::to_string(x) + ", " + std::to_string(y) + " Color: " + color ), 0);
 	return;

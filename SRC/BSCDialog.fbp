@@ -48,7 +48,7 @@
             <property name="name">BrightnessSaturationContrastDialog</property>
             <property name="pos">100,600</property>
             <property name="size">441,135</property>
-            <property name="style">wxCAPTION|wxRESIZE_BORDER</property>
+            <property name="style">wxCAPTION|wxCLOSE_BOX|wxRESIZE_BORDER</property>
             <property name="subclass">; ; forward_declare</property>
             <property name="title">Brightness Saturation &amp; Contrast</property>
             <property name="tooltip"></property>

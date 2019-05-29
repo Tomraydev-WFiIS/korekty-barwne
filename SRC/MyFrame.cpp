@@ -102,7 +102,6 @@ void MyFrame::GUIOnUpdateUI(wxUpdateUIEvent& event) {
 	Repaint();
 }
 
-
 void MyFrame::m_fileOpenOnMenuSelection(wxCommandEvent& event) {
 	wxFileDialog
 		openFileDialog(this, _("Open image file"), "..\\img", "",
@@ -141,6 +140,16 @@ void MyFrame::m_fileOpenOnMenuSelection(wxCommandEvent& event) {
 	SetStatusText(wxT("Loaded file: " + fileName), 0);
 }
 
+int max(int a, int b) {
+	if (a > b) return a;
+	else return b;
+}
+
+int bezwzgl(int w) {
+	if (w >= 0) return w;
+	else return w * (-1);
+}
+
 void MyFrame::changePixelsAlgo() {
 	wxImage processImage = this->imgNew.Copy();
 
@@ -150,12 +159,13 @@ void MyFrame::changePixelsAlgo() {
 
 			if (pixelColor == pickedColor) {
 				processImage.SetRGB(i, j, hexagonColor->Red(), hexagonColor->Green(), hexagonColor->Blue());
-			} else {
+			}
+			else {
 				int ratio = this->m_propSlider->GetValue();
 
-				int new_r = colorHelper(pixelColor.Red() * (100 - ratio)/100 + pickedColor.Red() * ratio/100);
-				int new_g = colorHelper(pixelColor.Green() * (100 - ratio)/100 + pickedColor.Green() * ratio/100);
-				int new_b = colorHelper(pixelColor.Blue() * (100 - ratio)/100 + pickedColor.Blue() * ratio/100);
+				int new_r = colorHelper(pixelColor.Red() * (100 - ratio)/100 + hexagonColor->Red() * ratio/100);
+				int new_g = colorHelper(pixelColor.Green() * (100 - ratio)/100 + hexagonColor->Green() * ratio/100);
+				int new_b = colorHelper(pixelColor.Blue() * (100 - ratio)/100 + hexagonColor->Blue() * ratio/100);
 
 				processImage.SetRGB(i, j, new_r, new_g, new_b);
 			}

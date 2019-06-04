@@ -67,11 +67,31 @@ GUI::GUI( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint&
 
 	m_notebook1 = new wxNotebook( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
 	m_panel_hexagon = new wxPanel( m_notebook1, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+	wxBoxSizer* bSizer4;
+	bSizer4 = new wxBoxSizer( wxVERTICAL );
+
+	m_notebook3 = new wxNotebook( m_panel_hexagon, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
+	m_panel_hexagon_color = new wxPanel( m_notebook3, wxID_ANY, wxDefaultPosition, wxSize( 256,-1 ), wxTAB_TRAVERSAL );
+	m_notebook3->AddPage( m_panel_hexagon_color, wxT("Colored"), true );
+	m_panel_hexagon_mod = new wxPanel( m_notebook3, wxID_ANY, wxDefaultPosition, wxSize( 256,-1 ), wxTAB_TRAVERSAL );
+	m_notebook3->AddPage( m_panel_hexagon_mod, wxT("Modified"), false );
+
+	bSizer4->Add( m_notebook3, 1, wxEXPAND | wxALL, 5 );
+
+
+	m_panel_hexagon->SetSizer( bSizer4 );
+	m_panel_hexagon->Layout();
+	bSizer4->Fit( m_panel_hexagon );
 	m_notebook1->AddPage( m_panel_hexagon, wxT("Hexagon"), true );
 	m_panel_histograms = new wxPanel( m_notebook1, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	wxBoxSizer* bSizer2;
 	bSizer2 = new wxBoxSizer( wxVERTICAL );
 
+
+	///////////////////// Hexagon /////////////////////////
+	m_panel_hexagon_sizer = new wxBoxSizer(wxVERTICAL);
+	m_panel_hexagon_color->SetSizer(m_panel_hexagon_sizer);
+	////////////////////////////////////////////////////////
 	m_notebook4 = new wxNotebook( m_panel_histograms, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
 	m_panel_hist_old = new wxPanel( m_notebook4, wxID_ANY, wxDefaultPosition, wxSize( 256,-1 ), wxTAB_TRAVERSAL );
 	m_notebook4->AddPage( m_panel_hist_old, wxT("Old"), false );
@@ -82,11 +102,6 @@ GUI::GUI( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint&
 
 	m_buttonHistogram = new wxButton( m_panel_histograms, wxID_ANY, wxT("Generate Histograms"), wxDefaultPosition, wxDefaultSize, 0 );
 	bSizer2->Add( m_buttonHistogram, 0, wxALL|wxALIGN_CENTER_HORIZONTAL, 5 );
-
-	///////////////////// Hexagon /////////////////////////
-	m_panel_hexagon_sizer = new wxBoxSizer(wxVERTICAL);
-	m_panel_hexagon->SetSizer(m_panel_hexagon_sizer);
-	////////////////////////////////////////////////////////
 
 
 	m_panel_histograms->SetSizer( bSizer2 );

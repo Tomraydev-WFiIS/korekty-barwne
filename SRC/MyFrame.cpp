@@ -43,33 +43,42 @@ MyFrame::MyFrame(wxWindow* parent) : GUI(parent) {
 	wxImage::AddHandler(new wxPNGHandler);
 
 	//Hexagon
-	colorFromHexagonTxt = new wxStaticText(m_panel_hexagon, wxID_ANY, wxT("COLOR ON WHICH WE CHANGE"), wxDefaultPosition, wxDefaultSize, 0);
-	this->hexagon = new ColorsHexagon(m_panel_hexagon, colorFromHexagonTxt, hexagonColor);
+	colorFromHexagonTxt = new wxStaticText(m_panel_hexagon_color, wxID_ANY, wxT("COLOR ON WHICH WE CHANGE"), wxDefaultPosition, wxDefaultSize, 0);
+	this->hexagon = new ColorsHexagon(m_panel_hexagon_color, colorFromHexagonTxt, hexagonColor);
 	m_panel_hexagon_sizer->Add(this->hexagon);
 	
-	m_propText = new wxStaticText(m_panel_hexagon, wxID_ANY, wxT("Correction strength: 0%"), wxDefaultPosition, wxDefaultSize, 0);
+	m_propText = new wxStaticText(m_panel_hexagon_color, wxID_ANY, wxT("Correction strength: 0%"), wxDefaultPosition, wxDefaultSize, 0);
 	m_propText->Wrap(-1);
 	m_panel_hexagon_sizer->Add(m_propText, 0, wxALL, 5);
 
-	m_propSlider = new wxSlider(m_panel_hexagon, wxID_ANY, 50, 0, 100, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+	m_propSlider = new wxSlider(m_panel_hexagon_color, wxID_ANY, 50, 0, 100, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_propSlider->SetValue(0);
 	m_propSlider->Connect(wxEVT_SCROLL_CHANGED, wxScrollEventHandler(MyFrame::changePropSlider), NULL, this);
 	m_panel_hexagon_sizer->Add(m_propSlider, 0, wxALL, 5);
 	
-	colorFromImageTxt = new wxStaticText(m_panel_hexagon, wxID_ANY, wxT("COLOR TO CHANGE"), wxDefaultPosition, wxDefaultSize, 0);
+	colorFromImageTxt = new wxStaticText(m_panel_hexagon_color, wxID_ANY, wxT("COLOR TO CHANGE"), wxDefaultPosition, wxDefaultSize, 0);
 	colorFromImageTxt->Wrap(-1);
 	m_panel_hexagon_sizer->Add(colorFromImageTxt, 0, wxALL, 5);
 
 	colorFromHexagonTxt->Wrap(-1);
 	m_panel_hexagon_sizer->Add(colorFromHexagonTxt, 0, wxALL, 5);
 
-	hexagonButton = new wxButton(m_panel_hexagon, wxID_ANY, wxT("CHANGE PIXELS COLOR"), wxDefaultPosition, wxDefaultSize, 0);
+	hexagonButton = new wxButton(m_panel_hexagon_color, wxID_ANY, wxT("CHANGE PIXELS COLOR"), wxDefaultPosition, wxDefaultSize, 0);
 	hexagonButton->Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MyFrame::m_clickHexagonButton), NULL, this);
 	m_panel_hexagon_sizer->Add(hexagonButton, 0, wxALL, 5);
 
 	///////////////////////////////////////////////////////////////////////
 
-	
+	// Modified Hexagon
+
+
+	//m_staticline1 = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL);
+	//m_panel_hexagon_sizer->Add(m_staticline1, 0, wxEXPAND | wxALL, 5);
+
+	modHexagonButton = new wxButton(m_panel_hexagon_mod, wxID_ANY, wxT("Turn on/off mod hexagon"), wxDefaultPosition, wxDefaultSize, 0);
+	modHexagonButton->Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MyFrame::m_clickModHexagonButton), NULL, this);
+	m_panel_hexagon_sizer->Add(modHexagonButton, 0, wxALL, 5);
+	///////////////////////////////////////////////////////////////////////
 	wxImage image;
 	if (!image.LoadFile(wxString("..\\img\\lena.png"))) {
 		wxMessageBox(_("Nie uda\u0142o si\u0119 za\u0142adowa\u0107 obrazka"));
@@ -78,8 +87,8 @@ MyFrame::MyFrame(wxWindow* parent) : GUI(parent) {
 	}
 	else {
 		imgOld = image.Copy();
-		imgNew = imgOld.Copy();
 		imgToBSC = imgOld.Copy();
+		imgNew = imgOld.Copy();
 	}
 
 	wxSize size = image.GetSize();
@@ -103,7 +112,6 @@ MyFrame::~MyFrame() {
 void MyFrame::GUIOnUpdateUI(wxUpdateUIEvent& event) {
 	Repaint();
 }
-
 
 void MyFrame::m_fileOpenOnMenuSelection(wxCommandEvent& event) {
 	wxFileDialog
@@ -143,21 +151,32 @@ void MyFrame::m_fileOpenOnMenuSelection(wxCommandEvent& event) {
 	SetStatusText(wxT("Loaded file: " + fileName), 0);
 }
 
+int max(int a, int b) {
+	if (a > b) return a;
+	else return b;
+}
+
+int bezwzgl(int w) {
+	if (w >= 0) return w;
+	else return w * (-1);
+}
+
 void MyFrame::changePixelsAlgo() {
 	wxImage processImage = this->imgNew.Copy();
-
+	int ratio = this->m_propSlider->GetValue();
+	hexagonSliderValue = ratio;
 	for (int i = 0; i < processImage.GetWidth(); i++) {
 		for (int j = 0; j < processImage.GetHeight(); j++) {
 			wxColor pixelColor = wxColor(processImage.GetRed(i, j), processImage.GetGreen(i, j), processImage.GetBlue(i, j));
 
 			if (pixelColor == pickedColor) {
 				processImage.SetRGB(i, j, hexagonColor->Red(), hexagonColor->Green(), hexagonColor->Blue());
-			} else {
-				int ratio = this->m_propSlider->GetValue();
-
-				int new_r = colorHelper(pixelColor.Red() * (100 - ratio)/100 + pickedColor.Red() * ratio/100);
-				int new_g = colorHelper(pixelColor.Green() * (100 - ratio)/100 + pickedColor.Green() * ratio/100);
-				int new_b = colorHelper(pixelColor.Blue() * (100 - ratio)/100 + pickedColor.Blue() * ratio/100);
+			}
+			else {
+				
+				int new_r = colorHelper(pixelColor.Red() * (100 - ratio)/100 + hexagonColor->Red() * ratio/100);
+				int new_g = colorHelper(pixelColor.Green() * (100 - ratio)/100 + hexagonColor->Green() * ratio/100);
+				int new_b = colorHelper(pixelColor.Blue() * (100 - ratio)/100 + hexagonColor->Blue() * ratio/100);
 
 				processImage.SetRGB(i, j, new_r, new_g, new_b);
 			}
@@ -165,12 +184,242 @@ void MyFrame::changePixelsAlgo() {
 	}
 
 	this->bitMapNew = wxBitmap(processImage);
-	this->imgToBSC = processImage.Copy();
 	this->Refresh();
 }
 
 void  MyFrame::m_clickHexagonButton(wxCommandEvent& event) {
 	changePixelsAlgo();
+}
+
+void MyFrame::calculateModHexagon(int* RGB) {
+	double brightness = 0.0, saturation = 0.0, contrast = 0.0;
+	if (brightnessDialog) {
+		brightness = brightnessDialog->getBrightness() - ((brightnessDialog->getMaxBrightness() + brightnessDialog->getMinBrightness()) / 2);
+		saturation = (double)brightnessDialog->getSaturation() / ((brightnessDialog->getMaxSaturation() + brightnessDialog->getMinSaturation()) / 2.0) - 1.0;
+		contrast = brightnessDialog->getContrast() - ((brightnessDialog->getMaxContrast() + brightnessDialog->getMinContrast()) / 2);
+		contrast = (contrast + 256.0) / (257.0 - contrast);
+	}
+	else
+		return;
+	
+
+	
+	//Change brightness
+	for (int i = 0; i < 3; i++) 
+	{
+		int newValue = RGB[i] + brightness;
+		if (newValue <= 1)
+			newValue = 1;
+		else if (newValue > 255)
+			newValue = 255;
+		RGB[i] = newValue;
+	}
+
+	// Change saturation
+	float hue, sat, val;
+	float x, f, i, p, q, t;
+	x = findMin(RGB[0], RGB[1], RGB[2]);
+	val = findMax(RGB[0], RGB[1], RGB[2]);
+	if (x == val)
+	{
+		hue = 0;
+		sat = 0;
+	}
+	else
+	{
+		if (RGB[0] == x)
+		{
+			f = RGB[1] - RGB[2];
+			i = 3.0;
+		}
+		else if (RGB[1] == x)
+		{
+			f = RGB[2] - RGB[0];
+			i = 5.0;
+		}
+		else
+		{
+			f = RGB[0] - RGB[1];
+			i = 1.0;
+		}
+
+		hue = fmod((i - f / (val - x)) * 60, 360);
+		sat = ((val - x) / val);
+
+		// change in saturation
+		if (saturation > 0)
+		{
+			sat += (1.0 - sat) * saturation;
+		}
+		else
+		{
+			sat += sat * saturation;
+		}
+
+		if (sat > 1.0)
+			sat = 1.0;
+		if (sat < 0.0)
+			sat = 0.0;
+
+		// HSV to RGB
+		if (val == 0)
+		{
+			RGB[0] = 0;
+			RGB[1] = 0;
+			RGB[2] = 0;
+		}
+		else
+		{
+			hue /= 60;
+			i = floor(hue);
+			f = hue - i;
+			p = val * (1 - sat);
+			q = val * (1 - (sat*f));
+			t = val * (1 - (sat*(1 - f)));
+			if (i == 0)
+			{
+				RGB[0] = val;
+				RGB[1] = t;
+				RGB[2] = p;
+			}
+			else if (i == 1)
+			{
+				RGB[0] = q;
+				RGB[1] = val;
+				RGB[2] = p;
+			}
+			else if (i == 2)
+			{
+				RGB[0] = p;
+				RGB[1] = val;
+				RGB[2] = t;
+			}
+			else if (i == 3)
+			{
+				RGB[0] = p;
+				RGB[1] = q;
+				RGB[2] = val;
+			}
+			else if (i == 4)
+			{
+				RGB[0] = t;
+				RGB[1] = p;
+				RGB[2] = val;
+			}
+			else if (i == 5)
+			{
+				RGB[0] = val;
+				RGB[1] = p;
+				RGB[2] = q;
+			}
+
+		}
+	}
+
+	// Change contrast
+	for (unsigned int i = 0; i < 3; i++)
+	{
+		int newValue = (RGB[i] - (255.0 / 2.0)) * contrast + 255.0 / 2.0;
+		if (newValue < 0)
+			newValue = 0;
+		else if (newValue > 255)
+			newValue = 255;
+		RGB[i] = newValue;
+	}
+
+	// Change by hexagon
+
+	//auto str = L"count[ ] = " + std::to_string(hexagonSliderValue) + "\n"; OutputDebugString(str);
+	RGB[0] = colorHelper(RGB[0] * (100.0 - hexagonSliderValue) / 100.0 + hexagonColor->Red() * hexagonSliderValue / 100.0);
+	RGB[1] = colorHelper(RGB[1] * (100.0 - hexagonSliderValue) / 100.0 + hexagonColor->Green() * hexagonSliderValue / 100.0);
+	RGB[2] = colorHelper(RGB[2] * (100.0 - hexagonSliderValue) / 100.0 + hexagonColor->Blue() * hexagonSliderValue / 100.0);
+}
+
+void MyFrame::generateModHexagon() {
+	wxClientDC dc(m_panel_hexagon_mod);
+	wxBufferedDC dc1(&dc);
+	dc1.Clear();
+
+	int* RGB = new int[3];
+
+	/****** BLUE PART *******/
+	wxImage constBlueHexagon;
+	constBlueHexagon.Create(200, 200);
+	constBlueHexagon.SetMask(true);
+
+	const int a_blue = 110;
+	const int b_blue = 70;
+	const double step_a_blue = 255 / a_blue;
+	const double step_b_blue = 255 / b_blue;
+
+	for (int i = 0; i < a_blue; i++) {
+		for (int j = 0; j < b_blue; j++) {
+			RGB[0] = 255 - step_a_blue * i;
+			RGB[1] = step_b_blue * j;
+			RGB[2] = 255;
+			calculateModHexagon(RGB);
+			constBlueHexagon.SetRGB(j, i + j / 2, RGB[0], RGB[1], RGB[2]);
+		}
+	}
+
+	/****** GREEN PART *******/
+	wxImage constGreenHexagon;
+	constGreenHexagon.Create(200, 400);
+	constGreenHexagon.SetMask(true);
+
+	const int a_green = 110;
+	const int b_green = 70;
+	const double step_a_green = 255 / a_green;
+	const double step_b_green = 255 / b_green;
+
+	for (int i = 0; i < a_green; i++) {
+		for (int j = 0; j < b_green; j++) {
+			RGB[0] = 255 - step_a_green * i;
+			RGB[1] = 255;
+			RGB[2] = 255 - step_b_green * j;
+			calculateModHexagon(RGB);
+			constGreenHexagon.SetRGB(j, i - j / 2 + 65, RGB[0], RGB[1], RGB[2]);
+		}
+	}
+
+	/****** RED PART *******/
+	wxImage constRedHexagon;
+	constRedHexagon.Create(100, 100);
+	constRedHexagon.SetMask(true);
+
+	const int a_red = 100;
+	const int b_red = 100;
+	const double step_a_red = 255 / a_red;
+	const double step_b_red = 255 / b_red;
+
+	for (int i = 0; i < a_red; i++) {
+		for (int j = 0; j < b_red; j++) {
+			RGB[0] = 255;
+			RGB[1] = step_a_red * i;
+			RGB[2] = 255 - step_b_red * j;
+			calculateModHexagon(RGB);
+			constRedHexagon.SetRGB(j, i, RGB[0], RGB[1], RGB[2]);
+		}
+	}
+
+	const double angle = 2 * M_PI / 360;
+	constRedHexagon = constRedHexagon.Rotate(angle * 45, wxPoint(50, 50));
+	constRedHexagon = constRedHexagon.Scale(145, 85);
+
+
+	dc1.DrawBitmap(wxBitmap(constRedHexagon), 28, 7, true);
+	dc1.DrawBitmap(wxBitmap(constGreenHexagon), 100, 20, true);
+	dc1.DrawBitmap(wxBitmap(constBlueHexagon), 30, 50, true);
+
+	
+}
+
+void MyFrame::m_clickModHexagonButton(wxCommandEvent& event){
+	if (modHexagonGenerated)
+		modHexagonGenerated = false;
+	else
+		modHexagonGenerated = true;
+	//generateModHexagon();
 }
 
 void MyFrame::changePropSlider(wxScrollEvent& event) {
@@ -213,7 +462,11 @@ void MyFrame::Repaint(void) {
 	dc1.DrawBitmap(bitMapOld, 0, 0, true);
 	dc2.DrawBitmap(bitMapNew, 0, 0, true);
 	//Paint histograms
-	if(histogramsGenerated) paintHistograms();
+	if(histogramsGenerated) 
+		paintHistograms();
+
+	if (modHexagonGenerated)
+		generateModHexagon();
 	return;
 }
 
@@ -236,11 +489,12 @@ void MyFrame::m_ViewBrightnessSaturationContrastWindowOnMenuSelection(wxCommandE
 	brightnessDialog->Show(showBrightnessSaturationContrastDialog);
 
 }
+
 void MyFrame::setBrightness(int value, int valueMin, int valueMax, bool firstChange) {
 	value -= (valueMax + valueMin) / 2;
 	//auto str = L"Brightness value " + std::to_string(value) + "\n"; OutputDebugString(str);
 	wxImage imgCpy = imgToBSC.Copy();;
-	if(firstChange == false)
+	if (firstChange == false)
 		imgCpy = imgNew.Copy();
 	unsigned int howManyPixels = 3 * imgCpy.GetHeight()*imgCpy.GetWidth();
 	unsigned char* picturePixel = imgCpy.GetData();
@@ -257,18 +511,20 @@ void MyFrame::setBrightness(int value, int valueMin, int valueMax, bool firstCha
 	imgNew = imgCpy.Copy();
 	wxBitmap bitmap(imgCpy);
 	bitMapNew = bitmap;
-	//Repaint();
+
+	if (firstChange)
+		SetStatusText(wxT("Brightness set"), 0);
 }
 
 void MyFrame::setSaturation(int enteredValue, int valueMin, int valueMax, bool firstChange) {
-	double value = (double)enteredValue / ( (valueMax + valueMin) / 2) - 1.0;
-	auto str = L"Saturation in percent " + std::to_string(value) + "\n"; OutputDebugString(str);
+	double value = (double)enteredValue / ((valueMax + valueMin) / 2) - 1.0;
+	//auto str = L"Saturation in percent " + std::to_string(value) + "\n"; OutputDebugString(str);
 	wxImage imgCpy = imgToBSC.Copy();;
 	if (firstChange == false)
 		imgCpy = imgNew.Copy();
 	unsigned int howManyPixels = 3 * imgCpy.GetHeight()*imgCpy.GetWidth();
 	unsigned char* picturePixel = imgCpy.GetData();
-	
+
 	float hue, sat, val;
 	float x, f, i, p, q, t;
 	for (unsigned int k = 0; k < howManyPixels; k += 3)
@@ -301,7 +557,7 @@ void MyFrame::setSaturation(int enteredValue, int valueMin, int valueMax, bool f
 
 			hue = fmod((i - f / (val - x)) * 60, 360);
 			sat = ((val - x) / val);
-			
+
 			// change in saturation
 			if (value > 0)
 			{
@@ -368,7 +624,7 @@ void MyFrame::setSaturation(int enteredValue, int valueMin, int valueMax, bool f
 					picturePixel[k + 1] = p;
 					picturePixel[k + 2] = q;
 				}
-				
+
 			}
 
 		}
@@ -376,7 +632,9 @@ void MyFrame::setSaturation(int enteredValue, int valueMin, int valueMax, bool f
 	imgNew = imgCpy.Copy();
 	wxBitmap bitmap(imgCpy);
 	bitMapNew = bitmap;
-	//Repaint();
+
+	if (firstChange)
+		SetStatusText(wxT("Saturation set"), 0);
 
 }
 
@@ -389,7 +647,7 @@ void MyFrame::setContrast(int value, int valueMin, int valueMax, bool firstChang
 	unsigned int howManyPixels = 3 * imgCpy.GetHeight()*imgCpy.GetWidth();
 	unsigned char* picturePixel = imgCpy.GetData();
 	double contrast = (value + 256.0) / (257.0 - value);
-	
+
 	for (unsigned int i = 0; i < howManyPixels; i++)
 	{
 		int newValue = (picturePixel[i] - (255.0 / 2.0)) * contrast + 255.0 / 2.0;
@@ -402,7 +660,9 @@ void MyFrame::setContrast(int value, int valueMin, int valueMax, bool firstChang
 	imgNew = imgCpy.Copy();
 	wxBitmap bitmap(imgCpy);
 	bitMapNew = bitmap;
-	//Repaint();
+
+	if (firstChange)
+		SetStatusText(wxT("Contrast set"), 0);
 }
 
 void MyFrame::m_scrolledWindow1OnLeftDClick(wxMouseEvent& event) {
@@ -465,7 +725,7 @@ void MyFrame::m_buttonHistogramOnButtonClick(wxCommandEvent& event) {
 	int g_count_n[256] = { 0 };
 	int b_count_n[256] = { 0 };
 
-	calculateHistograms(imgOld, rgb_count, r_count, g_count, b_count);
+	calculateHistograms(imgOld, rgb_count, r_count, g_count, b_count); // nic ciekawego dla mnie
 	calculateHistograms(imgNew, rgb_count_n, r_count_n, g_count_n, b_count_n);
 	
 	//***** Creating the histogram images *****
@@ -550,8 +810,8 @@ void MyFrame::generate_hist_img(wxImage &img, wxBitmap &bitmap, int count[256], 
 
 //PISANIE DO KONSOLI W VS
 /*for (int i = 0; i < 256; i++) {
-		auto str = L"count[" + std::to_string(i) + "] = " + std::to_string(count[i]) + "\n";
-		OutputDebugString(str);
-	}*/
+	auto str = L"count[" + std::to_string(i) + "] = " + std::to_string(count[i]) + "\n";
+	OutputDebugString(str);
+}*/
 
 

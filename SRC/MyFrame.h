@@ -4,6 +4,7 @@
 #include "ColorsHexagon.h"
 #include <wx/dcbuffer.h>
 #include <wx/filedlg.h>
+#include <wx/statline.h>
 #include <cmath>
 
 float findMin(float x, float y, float z = 999999.9);
@@ -24,6 +25,10 @@ protected:
 	void changePixelsAlgo(void);
 	void changePropSlider(wxScrollEvent& event);
 
+	// Modified hexagon
+	void m_clickModHexagonButton(wxCommandEvent& event);
+	void generateModHexagon();
+	void calculateModHexagon(int* RGB);
 
 	// Brightness, Saturation and Contrast
 	void m_ViewBrightnessSaturationContrastWindowOnMenuSelection(wxCommandEvent& event);
@@ -61,6 +66,18 @@ public:
 	wxButton * hexagonButton;
 	wxStaticText * m_propText;
 	wxSlider * m_propSlider;
+	int hexagonSliderValue;
+
+	// Modified hexagon
+	wxStaticLine* m_staticline1;
+	wxButton * modHexagonButton;
+	wxImage redPartHex;
+	wxImage bluePartHex;
+	wxImage greenPartHex;
+	wxBitmap bitmapRedPartHex;
+	wxBitmap bitmapBluePartHex;
+	wxBitmap bitmapGreenPartHex;
+	bool modHexagonGenerated = false;
 
 	//Histograms
 	bool histogramsGenerated = false;

@@ -30,7 +30,20 @@ public:
 	MyBrightnessSaturationContrastDialog(wxWindow* parent) : BrightnessSaturationContrastDialog(parent) {
 		brightnessValue = 256;
 		saturationValue = 256;
-		contrastValue = 256;
+		contrastValue   = 256;
 	}
+
+	virtual int getBrightness() const { return brightnessValue; }
+	virtual int getMinBrightness() const { return m_BrightnessScrollBar->GetMin(); }
+	virtual int getMaxBrightness() const { return m_BrightnessScrollBar->GetMax(); }
+
+	virtual int getSaturation() const { return saturationValue; }
+	virtual int getMinSaturation() const { return m_SaturationScrollBar->GetMin(); }
+	virtual int getMaxSaturation() const { return m_SaturationScrollBar->GetMax(); }
+
+	virtual int getContrast()   const { return contrastValue; }
+	virtual int getMinContrast() const { return m_ContrastScrollBar->GetMin(); }
+	virtual int getMaxContrast() const { return m_ContrastScrollBar->GetMax(); }
+
 
 };

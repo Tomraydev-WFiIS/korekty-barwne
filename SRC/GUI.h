@@ -40,7 +40,7 @@ class GUI : public wxFrame
 	protected:
 
 		//Hexagon
-		wxPanel * m_panel_hexagon;
+		//wxPanel * m_panel_hexagon;
 		wxBoxSizer* m_panel_hexagon_sizer;
 		//////////////////////////////////
 
@@ -50,7 +50,10 @@ class GUI : public wxFrame
 		wxScrolledWindow* m_scrolledWindow1;
 		wxScrolledWindow* m_scrolledWindow2;
 		wxNotebook* m_notebook1;
-
+		wxPanel* m_panel_hexagon;
+		wxNotebook* m_notebook3;
+		wxPanel* m_panel_hexagon_color;
+		wxPanel* m_panel_hexagon_mod;
 		wxPanel* m_panel_histograms;
 		wxNotebook* m_notebook4;
 		wxPanel* m_panel_hist_old;

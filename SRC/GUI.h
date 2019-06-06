@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// C++ code generated with wxFormBuilder (version Apr 17 2019)
+// C++ code generated with wxFormBuilder (version Mar 23 2019)
 // http://www.wxformbuilder.org/
 //
 // PLEASE DO *NOT* EDIT THIS FILE!
@@ -23,7 +23,6 @@
 #include <wx/panel.h>
 #include <wx/notebook.h>
 #include <wx/button.h>
-#include <wx/grid.h>
 #include <wx/statusbr.h>
 #include <wx/frame.h>
 
@@ -38,9 +37,7 @@ class GUI : public wxFrame
 	private:
 
 	protected:
-
 		//Hexagon
-		//wxPanel * m_panel_hexagon;
 		wxBoxSizer* m_panel_hexagon_sizer;
 		//////////////////////////////////
 
@@ -59,8 +56,6 @@ class GUI : public wxFrame
 		wxPanel* m_panel_hist_old;
 		wxPanel* m_panel_hist_new;
 		wxButton* m_buttonHistogram;
-		wxPanel* m_panel_convolutions;
-		wxGrid* m_grid3;
 		wxStatusBar* m_statusBar1;
 
 		// Virtual event handlers, overide them in your derived class

@@ -512,8 +512,12 @@ void MyFrame::setBrightness(int value, int valueMin, int valueMax, bool firstCha
 	wxBitmap bitmap(imgCpy);
 	bitMapNew = bitmap;
 
-	if (firstChange)
+	if (firstChange) {
 		SetStatusText(wxT("Brightness set"), 0);
+	}
+	if (histogramsGenerated) {
+		updateHistogram();
+	}
 }
 
 void MyFrame::setSaturation(int enteredValue, int valueMin, int valueMax, bool firstChange) {
@@ -633,9 +637,12 @@ void MyFrame::setSaturation(int enteredValue, int valueMin, int valueMax, bool f
 	wxBitmap bitmap(imgCpy);
 	bitMapNew = bitmap;
 
-	if (firstChange)
+	if (firstChange) {
 		SetStatusText(wxT("Saturation set"), 0);
-
+	}
+	if (histogramsGenerated) {
+		updateHistogram();
+	}
 }
 
 void MyFrame::setContrast(int value, int valueMin, int valueMax, bool firstChange) {
@@ -661,8 +668,12 @@ void MyFrame::setContrast(int value, int valueMin, int valueMax, bool firstChang
 	wxBitmap bitmap(imgCpy);
 	bitMapNew = bitmap;
 
-	if (firstChange)
+	if (firstChange) {
 		SetStatusText(wxT("Contrast set"), 0);
+	}
+	if (histogramsGenerated) {
+		updateHistogram();
+	}
 }
 
 void MyFrame::m_scrolledWindow1OnLeftDClick(wxMouseEvent& event) {
@@ -742,6 +753,21 @@ void MyFrame::m_buttonHistogramOnButtonClick(wxCommandEvent& event) {
 	histogramsGenerated = true;
 	paintHistograms();
 	SetStatusText(wxT("Generated old and new histograms"), 0);
+	return;
+}
+
+void MyFrame::updateHistogram(void) {
+	int rgb_count_n[256] = { 0 };
+	int r_count_n[256] = { 0 };
+	int g_count_n[256] = { 0 };
+	int b_count_n[256] = { 0 };
+
+	calculateHistograms(imgNew, rgb_count_n, r_count_n, g_count_n, b_count_n);
+	generate_hist_img(imgHistogramRGB_n, bitMapHistogramRGB_n, rgb_count_n, 0x00, 0x00, 0x00);
+	generate_hist_img(imgHistogramR_n, bitMapHistogramR_n, r_count_n, 0xff, 0x00, 0x00);
+	generate_hist_img(imgHistogramG_n, bitMapHistogramG_n, g_count_n, 0x00, 0xff, 0x00);
+	generate_hist_img(imgHistogramB_n, bitMapHistogramB_n, b_count_n, 0x00, 0x00, 0xff);
+	paintHistograms();
 	return;
 }
 

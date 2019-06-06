@@ -21,6 +21,7 @@ protected:
 	void m_ViewStatusBarOnMenuSelection(wxCommandEvent& event);
 
 	//hexagon
+	void m_scrolledWindow1OnLeftDClick(wxMouseEvent& event);
 	void m_clickHexagonButton(wxCommandEvent& event);
 	void changePixelsAlgo(void);
 	void changePropSlider(wxScrollEvent& event);
@@ -36,14 +37,15 @@ protected:
 	void setSaturation(int value, int valueMin, int valueMax, bool firstChange = true);
 	void setContrast(int value, int valueMin, int valueMax, bool firstChange = true);
 
-	void m_scrolledWindow1OnLeftDClick(wxMouseEvent& event);
+	//Histograms
 	void m_buttonHistogramOnButtonClick(wxCommandEvent& event);
-	
-	void Repaint(void); // Repaint the Old and New image.
+
 	void generate_hist_img(wxImage &img,wxBitmap &bitmap, int count[256], int r, int g, int b);
 	void paintHistograms(void);
 	void calculateHistograms(wxImage &img, int rgb_count[256], int r_count[256], int g_count[256], int b_count[256]);
+	void updateHistogram(void);
 
+	void Repaint(void); // Repaint the Old and New image.
 public:
 	MyFrame(wxWindow* parent);
 	~MyFrame();

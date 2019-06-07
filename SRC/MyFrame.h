@@ -69,6 +69,7 @@ public:
 	wxStaticText * m_propText;
 	wxSlider * m_propSlider;
 	int hexagonSliderValue;
+	bool hexagonChanged = false;
 
 	// Modified hexagon
 	wxCheckBox * modHexagonCheckBox;

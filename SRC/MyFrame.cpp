@@ -161,6 +161,7 @@ void MyFrame::changePixelsAlgo() {
 	wxImage processImage = this->imgNew.Copy();
 	int ratio = this->m_propSlider->GetValue();
 	hexagonSliderValue = ratio;
+
 	for (int i = 0; i < processImage.GetWidth(); i++) {
 		for (int j = 0; j < processImage.GetHeight(); j++) {
 			wxColor pixelColor = wxColor(processImage.GetRed(i, j), processImage.GetGreen(i, j), processImage.GetBlue(i, j));
@@ -178,13 +179,15 @@ void MyFrame::changePixelsAlgo() {
 			}
 		}
 	}
-
+	imgNew = processImage.Copy();
 	this->bitMapNew = wxBitmap(processImage);
 	this->Refresh();
 }
 
 void  MyFrame::m_clickHexagonButton(wxCommandEvent& event) {
+	hexagonChanged = true;
 	changePixelsAlgo();
+	updateHistogram();
 }
 
 void MyFrame::calculateModHexagon(int* RGB) {
@@ -415,7 +418,15 @@ void MyFrame::generateModHexagon() {
 
 void MyFrame::m_clickModHexagonButton(wxCommandEvent& event){
 	if (modHexagonGenerated)
+	{
 		modHexagonGenerated = false;
+		wxClientDC dc(m_panel_hexagon_mod);
+		wxBufferedDC dc1(&dc);
+
+		const wxBrush* background = wxWHITE_BRUSH;
+		dc1.SetBackground(*background);
+		dc1.Clear();
+	}
 	else
 		modHexagonGenerated = true;
 	//generateModHexagon();
@@ -495,6 +506,12 @@ void MyFrame::setBrightness(int value, int valueMin, int valueMax, bool firstCha
 	wxImage imgCpy = imgToBSC.Copy();;
 	if (firstChange == false)
 		imgCpy = imgNew.Copy();
+	else if (hexagonChanged == true)
+	{
+		imgCpy = imgNew.Copy();
+		imgToBSC = imgNew.Copy();
+		hexagonChanged = false;
+	}
 	unsigned int howManyPixels = 3 * imgCpy.GetHeight()*imgCpy.GetWidth();
 	unsigned char* picturePixel = imgCpy.GetData();
 
@@ -525,6 +542,12 @@ void MyFrame::setSaturation(int enteredValue, int valueMin, int valueMax, bool f
 	wxImage imgCpy = imgToBSC.Copy();;
 	if (firstChange == false)
 		imgCpy = imgNew.Copy();
+	else if (hexagonChanged == true)
+	{
+		imgCpy = imgNew.Copy();
+		imgToBSC = imgNew.Copy();
+		hexagonChanged = false;
+	}
 	unsigned int howManyPixels = 3 * imgCpy.GetHeight()*imgCpy.GetWidth();
 	unsigned char* picturePixel = imgCpy.GetData();
 
@@ -650,6 +673,12 @@ void MyFrame::setContrast(int value, int valueMin, int valueMax, bool firstChang
 	wxImage imgCpy = imgToBSC.Copy();;
 	if (firstChange == false)
 		imgCpy = imgNew.Copy();
+	else if (hexagonChanged == true)
+	{
+		imgCpy = imgNew.Copy();
+		imgToBSC = imgNew.Copy();
+		hexagonChanged = false;
+	}
 	unsigned int howManyPixels = 3 * imgCpy.GetHeight()*imgCpy.GetWidth();
 	unsigned char* picturePixel = imgCpy.GetData();
 	double contrast = (value + 256.0) / (257.0 - value);

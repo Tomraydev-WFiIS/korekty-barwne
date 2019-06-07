@@ -4,7 +4,7 @@
 #include "ColorsHexagon.h"
 #include <wx/dcbuffer.h>
 #include <wx/filedlg.h>
-#include <wx/statline.h>
+#include <wx/checkbox.h>
 #include <cmath>
 
 float findMin(float x, float y, float z = 999999.9);
@@ -71,8 +71,7 @@ public:
 	int hexagonSliderValue;
 
 	// Modified hexagon
-	wxStaticLine* m_staticline1;
-	wxButton * modHexagonButton;
+	wxCheckBox * modHexagonCheckBox;
 	wxImage redPartHex;
 	wxImage bluePartHex;
 	wxImage greenPartHex;

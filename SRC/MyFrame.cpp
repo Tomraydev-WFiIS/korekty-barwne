@@ -71,13 +71,9 @@ MyFrame::MyFrame(wxWindow* parent) : GUI(parent) {
 
 	// Modified Hexagon
 
-
-	//m_staticline1 = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL);
-	//m_panel_hexagon_sizer->Add(m_staticline1, 0, wxEXPAND | wxALL, 5);
-
-	modHexagonButton = new wxButton(m_panel_hexagon_mod, wxID_ANY, wxT("Turn on/off mod hexagon"), wxDefaultPosition, wxDefaultSize, 0);
-	modHexagonButton->Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MyFrame::m_clickModHexagonButton), NULL, this);
-	m_panel_hexagon_sizer->Add(modHexagonButton, 0, wxALL, 5);
+	modHexagonCheckBox = new wxCheckBox(m_panel_hexagon_mod, wxID_ANY, wxT("Turn on/off mod hexagon"), wxDefaultPosition, wxDefaultSize, 0);
+	m_panel_hexagon_sizer->Add(modHexagonCheckBox, 0, wxALIGN_CENTER | wxALL, 5);
+	modHexagonCheckBox->Connect(wxEVT_COMMAND_CHECKBOX_CLICKED, wxCommandEventHandler(MyFrame::m_clickModHexagonButton), NULL, this);
 	///////////////////////////////////////////////////////////////////////
 	wxImage image;
 	if (!image.LoadFile(wxString("..\\img\\lena.png"))) {
@@ -192,6 +188,13 @@ void  MyFrame::m_clickHexagonButton(wxCommandEvent& event) {
 }
 
 void MyFrame::calculateModHexagon(int* RGB) {
+
+	// Change by hexagon
+	int hexagonSliderValue = this->m_propSlider->GetValue();
+	RGB[0] = colorHelper(RGB[0] * (100.0 - hexagonSliderValue) / 100.0 + hexagonColor->Red() * hexagonSliderValue / 100.0);
+	RGB[1] = colorHelper(RGB[1] * (100.0 - hexagonSliderValue) / 100.0 + hexagonColor->Green() * hexagonSliderValue / 100.0);
+	RGB[2] = colorHelper(RGB[2] * (100.0 - hexagonSliderValue) / 100.0 + hexagonColor->Blue() * hexagonSliderValue / 100.0);
+	
 	double brightness = 0.0, saturation = 0.0, contrast = 0.0;
 	if (brightnessDialog) {
 		brightness = brightnessDialog->getBrightness() - ((brightnessDialog->getMaxBrightness() + brightnessDialog->getMinBrightness()) / 2);
@@ -327,17 +330,14 @@ void MyFrame::calculateModHexagon(int* RGB) {
 		RGB[i] = newValue;
 	}
 
-	// Change by hexagon
-
-	//auto str = L"count[ ] = " + std::to_string(hexagonSliderValue) + "\n"; OutputDebugString(str);
-	RGB[0] = colorHelper(RGB[0] * (100.0 - hexagonSliderValue) / 100.0 + hexagonColor->Red() * hexagonSliderValue / 100.0);
-	RGB[1] = colorHelper(RGB[1] * (100.0 - hexagonSliderValue) / 100.0 + hexagonColor->Green() * hexagonSliderValue / 100.0);
-	RGB[2] = colorHelper(RGB[2] * (100.0 - hexagonSliderValue) / 100.0 + hexagonColor->Blue() * hexagonSliderValue / 100.0);
 }
 
 void MyFrame::generateModHexagon() {
 	wxClientDC dc(m_panel_hexagon_mod);
 	wxBufferedDC dc1(&dc);
+	
+	const wxBrush* background = wxWHITE_BRUSH;
+	dc1.SetBackground(*background);
 	dc1.Clear();
 
 	int* RGB = new int[3];
@@ -406,7 +406,6 @@ void MyFrame::generateModHexagon() {
 	constRedHexagon = constRedHexagon.Rotate(angle * 45, wxPoint(50, 50));
 	constRedHexagon = constRedHexagon.Scale(145, 85);
 
-
 	dc1.DrawBitmap(wxBitmap(constRedHexagon), 28, 7, true);
 	dc1.DrawBitmap(wxBitmap(constGreenHexagon), 100, 20, true);
 	dc1.DrawBitmap(wxBitmap(constBlueHexagon), 30, 50, true);
@@ -465,7 +464,7 @@ void MyFrame::Repaint(void) {
 	if(histogramsGenerated) 
 		paintHistograms();
 
-	if (modHexagonGenerated)
+	if (modHexagonGenerated) 
 		generateModHexagon();
 	return;
 }

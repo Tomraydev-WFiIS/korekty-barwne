@@ -34,6 +34,10 @@ void MyBrightnessSaturationContrastDialog::OnScrollingBrightness(wxScrollEvent& 
 
 	m_BrightnessSetOnEnter->SetValue(value);
 
+	if (static_cast<MyFrame*>(GetParent())->histogramsGenerated) {
+		static_cast<MyFrame*>(GetParent())->updateHistogram();
+	}
+
 	static_cast<MyFrame*>(GetParent())->Repaint();
 
 }
@@ -61,6 +65,10 @@ void MyBrightnessSaturationContrastDialog::OnScrollingSaturation(wxScrollEvent& 
 
 	m_SaturationSetOnEnter->SetValue(value);
 
+	if (static_cast<MyFrame*>(GetParent())->histogramsGenerated) {
+		static_cast<MyFrame*>(GetParent())->updateHistogram();
+	}
+
 	static_cast<MyFrame*>(GetParent())->Repaint();
 }
 
@@ -86,6 +94,10 @@ void MyBrightnessSaturationContrastDialog::OnScrollingContrast(wxScrollEvent& ev
 	value = value * (m_ContrastSetOnEnter->GetMax() - m_ContrastSetOnEnter->GetMin()) + m_ContrastSetOnEnter->GetMin();
 
 	m_ContrastSetOnEnter->SetValue(value);
+
+	if (static_cast<MyFrame*>(GetParent())->histogramsGenerated) {
+		static_cast<MyFrame*>(GetParent())->updateHistogram();
+	}
 
 	static_cast<MyFrame*>(GetParent())->Repaint();
 }

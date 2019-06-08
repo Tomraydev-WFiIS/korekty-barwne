@@ -555,9 +555,7 @@ void MyFrame::setBrightness(int value, int valueMin, int valueMax, bool firstCha
 	if (firstChange) {
 		SetStatusText(wxT("Brightness set"), 0);
 	}
-	if (histogramsGenerated) {
-		updateHistogram();
-	}
+
 }
 
 void MyFrame::setSaturation(int enteredValue, int valueMin, int valueMax, bool firstChange, bool reset) {
@@ -696,9 +694,7 @@ void MyFrame::setSaturation(int enteredValue, int valueMin, int valueMax, bool f
 	if (firstChange) {
 		SetStatusText(wxT("Saturation set"), 0);
 	}
-	if (histogramsGenerated) {
-		updateHistogram();
-	}
+
 }
 
 void MyFrame::setContrast(int value, int valueMin, int valueMax, bool firstChange, bool reset) {
@@ -741,9 +737,7 @@ void MyFrame::setContrast(int value, int valueMin, int valueMax, bool firstChang
 	if (firstChange) {
 		SetStatusText(wxT("Contrast set"), 0);
 	}
-	if (histogramsGenerated) {
-		updateHistogram();
-	}
+
 }
 
 void MyFrame::m_scrolledWindow1OnLeftDClick(wxMouseEvent& event) {

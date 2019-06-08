@@ -25,10 +25,11 @@ protected:
 	void m_clickHexagonButton(wxCommandEvent& event);
 	void changePixelsAlgo(bool resetBSC = false);
 	void changePropSlider(wxScrollEvent& event);
-
+	void m_clickHexagonResetButton(wxCommandEvent& event);
 
 	// Modified hexagon
 	void m_clickModHexagonButton(wxCommandEvent& event);
+	
 	void generateModHexagon();
 	void calculateModHexagon(int* RGB);
 
@@ -67,6 +68,7 @@ public:
 	wxStaticText * colorFromImageTxt;
 	wxStaticText * colorFromHexagonTxt;
 	wxButton * hexagonButton;
+	wxButton * hexagonResetButton;
 	wxStaticText * m_propText;
 	wxSlider * m_propSlider;
 	int hexagonSliderValue;

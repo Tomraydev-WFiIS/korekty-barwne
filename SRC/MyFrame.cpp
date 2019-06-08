@@ -67,6 +67,10 @@ MyFrame::MyFrame(wxWindow* parent) : GUI(parent) {
 	hexagonButton->Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MyFrame::m_clickHexagonButton), NULL, this);
 	m_panel_hexagon_sizer->Add(hexagonButton, 0, wxALL, 5);
 
+	hexagonResetButton = new wxButton(m_panel_hexagon_color, wxID_ANY, wxT("RESET"), wxDefaultPosition, wxDefaultSize, 0);
+	hexagonResetButton->Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MyFrame::m_clickHexagonResetButton), NULL, this);
+	m_panel_hexagon_sizer->Add(hexagonResetButton, 0, wxALL, 5);
+
 	///////////////////////////////////////////////////////////////////////
 
 	// Modified Hexagon
@@ -201,6 +205,12 @@ void  MyFrame::m_clickHexagonButton(wxCommandEvent& event) {
 	
 	if(histogramsGenerated)
 		updateHistogram();
+}
+
+void  MyFrame::m_clickHexagonResetButton(wxCommandEvent& event) {
+	this->imgNew = this->imgOld.Copy();
+	this->bitMapNew = wxBitmap(this->imgNew.Copy());
+	this->Refresh();
 }
 
 void MyFrame::calculateModHexagon(int* RGB) {

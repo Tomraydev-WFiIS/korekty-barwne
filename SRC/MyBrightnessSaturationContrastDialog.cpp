@@ -172,3 +172,11 @@ void MyBrightnessSaturationContrastDialog::OnSpinContrast(wxSpinEvent& event) {
 	m_ContrastScrollBar->SetValue((int)value);
 	OnScrollingContrast(tmp);
 }
+
+void MyBrightnessSaturationContrastDialog::ResetAll() {
+	wxScrollEvent tmp{}; 
+	BrightnessReset(tmp);
+	SaturationReset(tmp);
+	ContrastReset(tmp);
+	
+}

@@ -52,5 +52,7 @@ public:
 	virtual int getMinContrast() const { return m_ContrastScrollBar->GetMin(); }
 	virtual int getMaxContrast() const { return m_ContrastScrollBar->GetMax(); }
 
+	virtual void ResetAll();
+
 
 };

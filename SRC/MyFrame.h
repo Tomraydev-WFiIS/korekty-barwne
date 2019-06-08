@@ -25,11 +25,11 @@ protected:
 	void m_clickHexagonButton(wxCommandEvent& event);
 	void changePixelsAlgo(bool resetBSC = false);
 	void changePropSlider(wxScrollEvent& event);
-	void m_clickHexagonResetButton(wxCommandEvent& event);
+	void m_clickResetAllButton(wxCommandEvent& event);
 
 	// Modified hexagon
 	void m_clickModHexagonButton(wxCommandEvent& event);
-	
+
 	void generateModHexagon();
 	void calculateModHexagon(int* RGB);
 
@@ -42,7 +42,7 @@ protected:
 	//Histograms
 	void m_buttonHistogramOnButtonClick(wxCommandEvent& event);
 
-	void generate_hist_img(wxImage &img,wxBitmap &bitmap, int count[256], int r, int g, int b);
+	void generate_hist_img(wxImage &img, wxBitmap &bitmap, int count[256], int r, int g, int b);
 	void paintHistograms(void);
 	void calculateHistograms(wxImage &img, int rgb_count[256], int r_count[256], int g_count[256], int b_count[256]);
 	void updateHistogram(void);
@@ -64,11 +64,14 @@ public:
 	//Hexagon
 	wxColor * hexagonColor = new wxColor(0, 0, 0);
 	wxColor pickedColor = wxColor(0, 0, 0);
+	wxColor lastImageColor = wxColor(0, 0, 0);
+	wxColor lastPickedColor = wxColor(0, 0, 0);
+
 	ColorsHexagon * hexagon;
 	wxStaticText * colorFromImageTxt;
 	wxStaticText * colorFromHexagonTxt;
 	wxButton * hexagonButton;
-	wxButton * hexagonResetButton;
+	wxButton * resetAllButton;
 	wxStaticText * m_propText;
 	wxSlider * m_propSlider;
 	int hexagonSliderValue;
@@ -105,4 +108,3 @@ public:
 	wxBitmap bitMapHistogramG_n;
 	wxBitmap bitMapHistogramB_n;
 };
-

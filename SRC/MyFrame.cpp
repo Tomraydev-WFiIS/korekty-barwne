@@ -46,7 +46,7 @@ MyFrame::MyFrame(wxWindow* parent) : GUI(parent) {
 	colorFromHexagonTxt = new wxStaticText(m_panel_hexagon_color, wxID_ANY, wxT("COLOR ON WHICH WE CHANGE"), wxDefaultPosition, wxDefaultSize, 0);
 	this->hexagon = new ColorsHexagon(m_panel_hexagon_color, colorFromHexagonTxt, hexagonColor);
 	m_panel_hexagon_sizer->Add(this->hexagon);
-	
+
 	m_propText = new wxStaticText(m_panel_hexagon_color, wxID_ANY, wxT("Correction strength: 0%"), wxDefaultPosition, wxDefaultSize, 0);
 	m_propText->Wrap(-1);
 	m_panel_hexagon_sizer->Add(m_propText, 0, wxALL, 5);
@@ -55,7 +55,7 @@ MyFrame::MyFrame(wxWindow* parent) : GUI(parent) {
 	m_propSlider->SetValue(0);
 	m_propSlider->Connect(wxEVT_SCROLL_CHANGED, wxScrollEventHandler(MyFrame::changePropSlider), NULL, this);
 	m_panel_hexagon_sizer->Add(m_propSlider, 0, wxALL, 5);
-	
+
 	colorFromImageTxt = new wxStaticText(m_panel_hexagon_color, wxID_ANY, wxT("COLOR TO CHANGE"), wxDefaultPosition, wxDefaultSize, 0);
 	colorFromImageTxt->Wrap(-1);
 	m_panel_hexagon_sizer->Add(colorFromImageTxt, 0, wxALL, 5);
@@ -67,9 +67,9 @@ MyFrame::MyFrame(wxWindow* parent) : GUI(parent) {
 	hexagonButton->Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MyFrame::m_clickHexagonButton), NULL, this);
 	m_panel_hexagon_sizer->Add(hexagonButton, 0, wxALL, 5);
 
-	hexagonResetButton = new wxButton(m_panel_hexagon_color, wxID_ANY, wxT("RESET"), wxDefaultPosition, wxDefaultSize, 0);
-	hexagonResetButton->Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MyFrame::m_clickHexagonResetButton), NULL, this);
-	m_panel_hexagon_sizer->Add(hexagonResetButton, 0, wxALL, 5);
+	resetAllButton = new wxButton(m_panel_hexagon_color, wxID_ANY, wxT("RESET ALL SETTINGS"), wxDefaultPosition, wxDefaultSize, 0);
+	resetAllButton->Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MyFrame::m_clickResetAllButton), NULL, this);
+	m_panel_hexagon_sizer->Add(resetAllButton, 0, wxALL, 5);
 
 	///////////////////////////////////////////////////////////////////////
 
@@ -118,7 +118,7 @@ void MyFrame::m_fileOpenOnMenuSelection(wxCommandEvent& event) {
 		openFileDialog(this, _("Open image file"), "..\\img", "",
 			"Image files (*.bmp,*.jpeg,*.jpg,*.png)|*.bmp;*.jpeg;*.jpg;*.png", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
 
-	if (openFileDialog.ShowModal() == wxID_CANCEL){
+	if (openFileDialog.ShowModal() == wxID_CANCEL) {
 		return;
 	}
 	wxFileInputStream input_stream(openFileDialog.GetPath());
@@ -130,12 +130,12 @@ void MyFrame::m_fileOpenOnMenuSelection(wxCommandEvent& event) {
 	wxString fileName = openFileDialog.GetPath();
 
 	wxImage image;
-	if (!image.LoadFile(wxString(fileName))){
+	if (!image.LoadFile(wxString(fileName))) {
 		wxMessageBox(_("Nie uda\u0142o si\u0119 za\u0142adowa\u0107 obrazka"));
 		Destroy();
 		return;
 	}
-	else{
+	else {
 		imgOld = image.Copy();
 		imgNew = imgOld.Copy();
 	}
@@ -168,6 +168,12 @@ void MyFrame::changePixelsAlgo(bool resetBSC) {
 
 	if (resetBSC || (lastHexagonValue != hexagonSliderValue))
 		processImage = this->imgOld.Copy();
+	if ((lastImageColor != pickedColor ) || (lastPickedColor != *hexagonColor))
+	{
+		processImage = this->imgOld.Copy();
+		lastImageColor = pickedColor;
+		lastPickedColor = *hexagonColor;
+	}
 	for (int i = 0; i < processImage.GetWidth(); i++) {
 		for (int j = 0; j < processImage.GetHeight(); j++) {
 			wxColor pixelColor = wxColor(processImage.GetRed(i, j), processImage.GetGreen(i, j), processImage.GetBlue(i, j));
@@ -176,10 +182,10 @@ void MyFrame::changePixelsAlgo(bool resetBSC) {
 				processImage.SetRGB(i, j, hexagonColor->Red(), hexagonColor->Green(), hexagonColor->Blue());
 			}
 			else {
-				
-				int new_r = colorHelper(pixelColor.Red() * (100 - ratio)/100 + hexagonColor->Red() * ratio/100);
-				int new_g = colorHelper(pixelColor.Green() * (100 - ratio)/100 + hexagonColor->Green() * ratio/100);
-				int new_b = colorHelper(pixelColor.Blue() * (100 - ratio)/100 + hexagonColor->Blue() * ratio/100);
+
+				int new_r = colorHelper(pixelColor.Red() * (100 - ratio) / 100 + hexagonColor->Red() * ratio / 100);
+				int new_g = colorHelper(pixelColor.Green() * (100 - ratio) / 100 + hexagonColor->Green() * ratio / 100);
+				int new_b = colorHelper(pixelColor.Blue() * (100 - ratio) / 100 + hexagonColor->Blue() * ratio / 100);
 
 				processImage.SetRGB(i, j, new_r, new_g, new_b);
 			}
@@ -198,16 +204,30 @@ void MyFrame::changePixelsAlgo(bool resetBSC) {
 }
 
 void  MyFrame::m_clickHexagonButton(wxCommandEvent& event) {
-	if (lastHexagonValue == this->m_propSlider->GetValue())
+	if ((lastHexagonValue == this->m_propSlider->GetValue()) && ((lastImageColor == pickedColor) && (lastPickedColor == *hexagonColor)))
 		return;
 	hexagonChanged = true;
 	changePixelsAlgo();
-	
-	if(histogramsGenerated)
+
+	if (histogramsGenerated)
 		updateHistogram();
 }
 
-void  MyFrame::m_clickHexagonResetButton(wxCommandEvent& event) {
+void  MyFrame::m_clickResetAllButton(wxCommandEvent& event) {
+	wxScrollEvent tmp{};
+	if(brightnessDialog)
+		brightnessDialog->ResetAll();
+	lastHexagonValue = 0;
+	this->m_propSlider->SetValue(0);
+	this->changePropSlider(tmp);
+	pickedColor = wxColor(0, 0, 0);
+	colorFromImageTxt->SetForegroundColour(pickedColor);
+	colorFromImageTxt->Refresh();
+
+	*hexagonColor = wxColor(0, 0, 0);
+	colorFromHexagonTxt->SetForegroundColour(*hexagonColor);
+	colorFromHexagonTxt->Refresh();
+
 	this->imgNew = this->imgOld.Copy();
 	this->bitMapNew = wxBitmap(this->imgNew.Copy());
 	this->Refresh();
@@ -220,7 +240,7 @@ void MyFrame::calculateModHexagon(int* RGB) {
 	RGB[0] = colorHelper(RGB[0] * (100.0 - hexagonSliderValue) / 100.0 + hexagonColor->Red() * hexagonSliderValue / 100.0);
 	RGB[1] = colorHelper(RGB[1] * (100.0 - hexagonSliderValue) / 100.0 + hexagonColor->Green() * hexagonSliderValue / 100.0);
 	RGB[2] = colorHelper(RGB[2] * (100.0 - hexagonSliderValue) / 100.0 + hexagonColor->Blue() * hexagonSliderValue / 100.0);
-	
+
 	double brightness = 0.0, saturation = 0.0, contrast = 0.0;
 	if (brightnessDialog) {
 		brightness = brightnessDialog->getBrightness() - ((brightnessDialog->getMaxBrightness() + brightnessDialog->getMinBrightness()) / 2);
@@ -230,11 +250,11 @@ void MyFrame::calculateModHexagon(int* RGB) {
 	}
 	else
 		return;
-	
 
-	
+
+
 	//Change brightness
-	for (int i = 0; i < 3; i++) 
+	for (int i = 0; i < 3; i++)
 	{
 		int newValue = RGB[i] + brightness;
 		if (newValue <= 1)
@@ -361,7 +381,7 @@ void MyFrame::calculateModHexagon(int* RGB) {
 void MyFrame::generateModHexagon() {
 	wxClientDC dc(m_panel_hexagon_mod);
 	wxBufferedDC dc1(&dc);
-	
+
 	const wxBrush* background = wxWHITE_BRUSH;
 	dc1.SetBackground(*background);
 	dc1.Clear();
@@ -436,10 +456,10 @@ void MyFrame::generateModHexagon() {
 	dc1.DrawBitmap(wxBitmap(constGreenHexagon), 100, 20, true);
 	dc1.DrawBitmap(wxBitmap(constBlueHexagon), 30, 50, true);
 
-	
+
 }
 
-void MyFrame::m_clickModHexagonButton(wxCommandEvent& event){
+void MyFrame::m_clickModHexagonButton(wxCommandEvent& event) {
 	if (modHexagonGenerated)
 	{
 		modHexagonGenerated = false;
@@ -469,7 +489,7 @@ void MyFrame::m_fileSaveAsOnMenuSelection(wxCommandEvent& event) {
 	wxFileDialog
 		saveFileDialog(this, _("Save image file"), "..\\img", "",
 			"Image files (*.bmp,*.jpeg,*.jpg,*.png)|*.bmp;*.jpeg;*.jpg;*.png", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
-	if (saveFileDialog.ShowModal() == wxID_CANCEL){
+	if (saveFileDialog.ShowModal() == wxID_CANCEL) {
 		return;
 	}
 	wxFileOutputStream output_stream(saveFileDialog.GetPath());
@@ -496,10 +516,10 @@ void MyFrame::Repaint(void) {
 	dc1.DrawBitmap(bitMapOld, 0, 0, true);
 	dc2.DrawBitmap(bitMapNew, 0, 0, true);
 	//Paint histograms
-	if(histogramsGenerated) 
+	if (histogramsGenerated)
 		paintHistograms();
 
-	if (modHexagonGenerated) 
+	if (modHexagonGenerated)
 		generateModHexagon();
 	return;
 }
@@ -573,7 +593,7 @@ void MyFrame::setSaturation(int enteredValue, int valueMin, int valueMax, bool f
 	//auto str = L"Saturation in percent " + std::to_string(value) + "\n"; OutputDebugString(str);
 	if (reset)
 		imgToBSC = imgOld.Copy();
-	
+
 	wxImage imgCpy = imgToBSC.Copy();
 	if (firstChange == false)
 		imgCpy = imgNew.Copy();
@@ -764,8 +784,8 @@ void MyFrame::m_scrolledWindow1OnLeftDClick(wxMouseEvent& event) {
 		return;
 	}
 
-	pickedColor = wxColor(pixels[3*(y*w + x)], pixels[3*(y*w + x) + 1], pixels[3*(y*w + x) + 2]);
-	std::string color = std::to_string(pickedColor.Red() ) + ", " + std::to_string(pickedColor.Green()) + ", " + std::to_string(pickedColor.Blue());
+	pickedColor = wxColor(pixels[3 * (y*w + x)], pixels[3 * (y*w + x) + 1], pixels[3 * (y*w + x) + 2]);
+	std::string color = std::to_string(pickedColor.Red()) + ", " + std::to_string(pickedColor.Green()) + ", " + std::to_string(pickedColor.Blue());
 	colorFromImageTxt->SetForegroundColour(pickedColor);
 	colorFromImageTxt->Refresh();
 
@@ -776,43 +796,45 @@ void MyFrame::m_scrolledWindow1OnLeftDClick(wxMouseEvent& event) {
 
 	int max_value;
 	if (g >= r && g >= b) {
-		max_value = g/255;
+		max_value = g / 255;
 		g = 255;
 		r *= max_value;
 		b *= max_value;
-	}else if (b >= g && b >= r) {
-		max_value = b/255;
+	}
+	else if (b >= g && b >= r) {
+		max_value = b / 255;
 		b = 255;
 		r *= max_value;
 		g *= max_value;
-	} else {
-		max_value = r/255;
+	}
+	else {
+		max_value = r / 255;
 		r = 255;
 		g *= max_value;
 		b *= max_value;
 	}
-	
+
 	wxColour modified_color(r, g, b);
 	hexagon->setSelectedColor(modified_color);
 
-	SetStatusText(wxT("Clicked " + std::to_string(x) + ", " + std::to_string(y) + " Color: " + color ), 0);
+	SetStatusText(wxT("Clicked " + std::to_string(x) + ", " + std::to_string(y) + " Color: " + color), 0);
 	return;
 }
 
 void MyFrame::m_buttonHistogramOnButtonClick(wxCommandEvent& event) {
 	//***** Calculating the histograms *****
 	int rgb_count[256] = { 0 };
-	int r_count[256]  = { 0 };
-	int g_count[256]  = { 0 };
-	int b_count[256]  = { 0 };
+	int r_count[256] = { 0 };
+	int g_count[256] = { 0 };
+	int b_count[256] = { 0 };
 	int rgb_count_n[256] = { 0 };
 	int r_count_n[256] = { 0 };
 	int g_count_n[256] = { 0 };
 	int b_count_n[256] = { 0 };
 
-	calculateHistograms(imgOld, rgb_count, r_count, g_count, b_count); 
+	calculateHistograms(imgOld, rgb_count, r_count, g_count, b_count);
 	calculateHistograms(imgNew, rgb_count_n, r_count_n, g_count_n, b_count_n);
-	
+
 	//***** Creating the histogram images *****
 	generate_hist_img(imgHistogramRGB, bitMapHistogramRGB, rgb_count, 0x00, 0x00, 0x00);
 	generate_hist_img(imgHistogramR, bitMapHistogramR, r_count, 0xff, 0x00, 0x00);
@@ -910,8 +932,6 @@ void MyFrame::generate_hist_img(wxImage &img, wxBitmap &bitmap, int count[256], 
 
 //PISANIE DO KONSOLI W VS
 /*for (int i = 0; i < 256; i++) {
-	auto str = L"count[" + std::to_string(i) + "] = " + std::to_string(count[i]) + "\n";
-	OutputDebugString(str);
+auto str = L"count[" + std::to_string(i) + "] = " + std::to_string(count[i]) + "\n";
+OutputDebugString(str);
 }*/
-
-

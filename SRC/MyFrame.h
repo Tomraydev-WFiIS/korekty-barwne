@@ -23,8 +23,9 @@ protected:
 	//hexagon
 	void m_scrolledWindow1OnLeftDClick(wxMouseEvent& event);
 	void m_clickHexagonButton(wxCommandEvent& event);
-	void changePixelsAlgo(void);
+	void changePixelsAlgo(bool resetBSC = false);
 	void changePropSlider(wxScrollEvent& event);
+
 
 	// Modified hexagon
 	void m_clickModHexagonButton(wxCommandEvent& event);
@@ -33,9 +34,9 @@ protected:
 
 	// Brightness, Saturation and Contrast
 	void m_ViewBrightnessSaturationContrastWindowOnMenuSelection(wxCommandEvent& event);
-	void setBrightness(int value, int valueMin, int valueMax, bool firstChange = true);
-	void setSaturation(int value, int valueMin, int valueMax, bool firstChange = true);
-	void setContrast(int value, int valueMin, int valueMax, bool firstChange = true);
+	void setBrightness(int value, int valueMin, int valueMax, bool firstChange = true, bool reset = false);
+	void setSaturation(int value, int valueMin, int valueMax, bool firstChange = true, bool reset = false);
+	void setContrast(int value, int valueMin, int valueMax, bool firstChange = true, bool reset = false);
 
 	//Histograms
 	void m_buttonHistogramOnButtonClick(wxCommandEvent& event);
@@ -70,6 +71,7 @@ public:
 	wxSlider * m_propSlider;
 	int hexagonSliderValue;
 	bool hexagonChanged = false;
+	int lastHexagonValue = 0;
 
 	// Modified hexagon
 	wxCheckBox * modHexagonCheckBox;

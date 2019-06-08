@@ -157,11 +157,13 @@ int bezwzgl(int w) {
 	else return w * (-1);
 }
 
-void MyFrame::changePixelsAlgo() {
+void MyFrame::changePixelsAlgo(bool resetBSC) {
 	wxImage processImage = this->imgNew.Copy();
 	int ratio = this->m_propSlider->GetValue();
 	hexagonSliderValue = ratio;
 
+	if (resetBSC || (lastHexagonValue != hexagonSliderValue))
+		processImage = this->imgOld.Copy();
 	for (int i = 0; i < processImage.GetWidth(); i++) {
 		for (int j = 0; j < processImage.GetHeight(); j++) {
 			wxColor pixelColor = wxColor(processImage.GetRed(i, j), processImage.GetGreen(i, j), processImage.GetBlue(i, j));
@@ -181,13 +183,24 @@ void MyFrame::changePixelsAlgo() {
 	}
 	imgNew = processImage.Copy();
 	this->bitMapNew = wxBitmap(processImage);
+	lastHexagonValue = hexagonSliderValue;
+	if (brightnessDialog && (resetBSC == false)) {
+		setBrightness(brightnessDialog->getBrightness(), brightnessDialog->getMinBrightness(), brightnessDialog->getMaxBrightness());
+		setSaturation(brightnessDialog->getSaturation(), brightnessDialog->getMinSaturation(), brightnessDialog->getMaxSaturation(), false);
+		setContrast(brightnessDialog->getContrast(), brightnessDialog->getMinContrast(), brightnessDialog->getMaxContrast(), false);
+
+	}
 	this->Refresh();
 }
 
 void  MyFrame::m_clickHexagonButton(wxCommandEvent& event) {
+	if (lastHexagonValue == this->m_propSlider->GetValue())
+		return;
 	hexagonChanged = true;
 	changePixelsAlgo();
-	updateHistogram();
+	
+	if(histogramsGenerated)
+		updateHistogram();
 }
 
 void MyFrame::calculateModHexagon(int* RGB) {
@@ -426,6 +439,7 @@ void MyFrame::m_clickModHexagonButton(wxCommandEvent& event){
 		const wxBrush* background = wxWHITE_BRUSH;
 		dc1.SetBackground(*background);
 		dc1.Clear();
+		this->Refresh();
 	}
 	else
 		modHexagonGenerated = true;
@@ -500,17 +514,27 @@ void MyFrame::m_ViewBrightnessSaturationContrastWindowOnMenuSelection(wxCommandE
 
 }
 
-void MyFrame::setBrightness(int value, int valueMin, int valueMax, bool firstChange) {
+void MyFrame::setBrightness(int value, int valueMin, int valueMax, bool firstChange, bool reset) {
 	value -= (valueMax + valueMin) / 2;
 	//auto str = L"Brightness value " + std::to_string(value) + "\n"; OutputDebugString(str);
+	if (reset)
+		imgToBSC = imgOld.Copy();
+
 	wxImage imgCpy = imgToBSC.Copy();;
 	if (firstChange == false)
 		imgCpy = imgNew.Copy();
-	else if (hexagonChanged == true)
+	if (hexagonChanged == true)
 	{
 		imgCpy = imgNew.Copy();
 		imgToBSC = imgNew.Copy();
 		hexagonChanged = false;
+	}
+	if (reset)
+	{
+		imgNew = imgCpy.Copy();
+		changePixelsAlgo(true);
+		imgToBSC = imgNew.Copy();
+		return;
 	}
 	unsigned int howManyPixels = 3 * imgCpy.GetHeight()*imgCpy.GetWidth();
 	unsigned char* picturePixel = imgCpy.GetData();
@@ -536,17 +560,27 @@ void MyFrame::setBrightness(int value, int valueMin, int valueMax, bool firstCha
 	}
 }
 
-void MyFrame::setSaturation(int enteredValue, int valueMin, int valueMax, bool firstChange) {
+void MyFrame::setSaturation(int enteredValue, int valueMin, int valueMax, bool firstChange, bool reset) {
 	double value = (double)enteredValue / ((valueMax + valueMin) / 2) - 1.0;
 	//auto str = L"Saturation in percent " + std::to_string(value) + "\n"; OutputDebugString(str);
-	wxImage imgCpy = imgToBSC.Copy();;
+	if (reset)
+		imgToBSC = imgOld.Copy();
+	
+	wxImage imgCpy = imgToBSC.Copy();
 	if (firstChange == false)
 		imgCpy = imgNew.Copy();
-	else if (hexagonChanged == true)
+	if (hexagonChanged == true)
 	{
 		imgCpy = imgNew.Copy();
 		imgToBSC = imgNew.Copy();
 		hexagonChanged = false;
+	}
+	if (reset)
+	{
+		imgNew = imgCpy.Copy();
+		changePixelsAlgo(true);
+		imgToBSC = imgNew.Copy();
+		return;
 	}
 	unsigned int howManyPixels = 3 * imgCpy.GetHeight()*imgCpy.GetWidth();
 	unsigned char* picturePixel = imgCpy.GetData();
@@ -667,17 +701,25 @@ void MyFrame::setSaturation(int enteredValue, int valueMin, int valueMax, bool f
 	}
 }
 
-void MyFrame::setContrast(int value, int valueMin, int valueMax, bool firstChange) {
+void MyFrame::setContrast(int value, int valueMin, int valueMax, bool firstChange, bool reset) {
 	value -= (valueMax + valueMin) / 2;
-	//value /= 2;
+
+
 	wxImage imgCpy = imgToBSC.Copy();;
 	if (firstChange == false)
 		imgCpy = imgNew.Copy();
-	else if (hexagonChanged == true)
+	if (hexagonChanged == true)
 	{
 		imgCpy = imgNew.Copy();
 		imgToBSC = imgNew.Copy();
 		hexagonChanged = false;
+	}
+	if (reset)
+	{
+		imgNew = imgCpy.Copy();
+		changePixelsAlgo(true);
+		imgToBSC = imgNew.Copy();
+		return;
 	}
 	unsigned int howManyPixels = 3 * imgCpy.GetHeight()*imgCpy.GetWidth();
 	unsigned char* picturePixel = imgCpy.GetData();
@@ -764,7 +806,7 @@ void MyFrame::m_buttonHistogramOnButtonClick(wxCommandEvent& event) {
 	int g_count_n[256] = { 0 };
 	int b_count_n[256] = { 0 };
 
-	calculateHistograms(imgOld, rgb_count, r_count, g_count, b_count); // nic ciekawego dla mnie
+	calculateHistograms(imgOld, rgb_count, r_count, g_count, b_count); 
 	calculateHistograms(imgNew, rgb_count_n, r_count_n, g_count_n, b_count_n);
 	
 	//***** Creating the histogram images *****

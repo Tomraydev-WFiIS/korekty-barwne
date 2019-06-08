@@ -26,6 +26,13 @@ protected:
 	int saturationValue;
 	int contrastValue;
 
+	bool resetBrightness = false,
+			wasLastKeyResetBrightness = false,
+			resetSaturation = false,
+			wasLastKeyResetSaturation = false,
+			resetContrast = false,
+			wasLastKeyResetContrast = false;
+
 public:
 	MyBrightnessSaturationContrastDialog(wxWindow* parent) : BrightnessSaturationContrastDialog(parent) {
 		brightnessValue = 256;

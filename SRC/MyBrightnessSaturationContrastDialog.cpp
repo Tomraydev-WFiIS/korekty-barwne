@@ -13,9 +13,18 @@
 
 
 void MyBrightnessSaturationContrastDialog::OnScrollingBrightness(wxScrollEvent& event) {
+	if (resetBrightness && (wasLastKeyResetBrightness))
+		return;
+	else
+		wasLastKeyResetBrightness = false;
+
 	double value = m_BrightnessScrollBar->GetValue();
 	brightnessValue = value;
-	static_cast<MyFrame*>(GetParent())->setBrightness(brightnessValue, m_BrightnessScrollBar->GetMin(), m_BrightnessScrollBar->GetMax());
+	static_cast<MyFrame*>(GetParent())->setBrightness(brightnessValue, m_BrightnessScrollBar->GetMin(), m_BrightnessScrollBar->GetMax(), true, resetBrightness);
+	if (resetBrightness) {
+		wasLastKeyResetBrightness = true;
+		resetBrightness = false;
+	}
 
 	static_cast<MyFrame*>(GetParent())->setSaturation(saturationValue, m_SaturationScrollBar->GetMin(), m_SaturationScrollBar->GetMax(), false);
 	static_cast<MyFrame*>(GetParent())->setContrast(contrastValue, m_ContrastScrollBar->GetMin(), m_ContrastScrollBar->GetMax(), false);
@@ -30,9 +39,18 @@ void MyBrightnessSaturationContrastDialog::OnScrollingBrightness(wxScrollEvent& 
 }
 
 void MyBrightnessSaturationContrastDialog::OnScrollingSaturation(wxScrollEvent& event) {
+	if (resetSaturation && (wasLastKeyResetSaturation))
+		return;
+	else
+		wasLastKeyResetSaturation = false;
+	
 	double value = m_SaturationScrollBar->GetValue();
 	saturationValue = value;
-	static_cast<MyFrame*>(GetParent())->setSaturation(saturationValue, m_SaturationScrollBar->GetMin(), m_SaturationScrollBar->GetMax());
+	static_cast<MyFrame*>(GetParent())->setSaturation(saturationValue, m_SaturationScrollBar->GetMin(), m_SaturationScrollBar->GetMax(), true, resetSaturation);
+	if (resetSaturation) {
+		wasLastKeyResetSaturation = true;
+		resetSaturation = false;
+	}
 
 	static_cast<MyFrame*>(GetParent())->setBrightness(brightnessValue, m_BrightnessScrollBar->GetMin(), m_BrightnessScrollBar->GetMax(), false);
 	static_cast<MyFrame*>(GetParent())->setContrast(contrastValue, m_ContrastScrollBar->GetMin(), m_ContrastScrollBar->GetMax(), false);
@@ -47,9 +65,18 @@ void MyBrightnessSaturationContrastDialog::OnScrollingSaturation(wxScrollEvent& 
 }
 
 void MyBrightnessSaturationContrastDialog::OnScrollingContrast(wxScrollEvent& event) {
+	if (resetContrast && (wasLastKeyResetContrast))
+		return;
+	else
+		wasLastKeyResetContrast = false;
+	
 	double value = m_ContrastScrollBar->GetValue();
 	contrastValue = value;
-	static_cast<MyFrame*>(GetParent())->setContrast(contrastValue, m_ContrastScrollBar->GetMin(), m_ContrastScrollBar->GetMax());
+	static_cast<MyFrame*>(GetParent())->setContrast(contrastValue, m_ContrastScrollBar->GetMin(), m_ContrastScrollBar->GetMax(), true, resetContrast);
+	if (resetContrast) {
+		wasLastKeyResetContrast = true;
+		resetContrast = false;
+	}
 
 	static_cast<MyFrame*>(GetParent())->setBrightness(brightnessValue, m_BrightnessScrollBar->GetMin(), m_BrightnessScrollBar->GetMax(), false);
 	static_cast<MyFrame*>(GetParent())->setSaturation(saturationValue, m_SaturationScrollBar->GetMin(), m_SaturationScrollBar->GetMax(), false);
@@ -65,16 +92,28 @@ void MyBrightnessSaturationContrastDialog::OnScrollingContrast(wxScrollEvent& ev
 
 void MyBrightnessSaturationContrastDialog::BrightnessReset(wxCommandEvent& event) {
 	wxScrollEvent tmp{};
+
+	if (wasLastKeyResetBrightness)
+		return;
+	resetBrightness = true;
+
+
 	int value = (m_BrightnessScrollBar->GetMax() + m_BrightnessScrollBar->GetMin()) / 2.0;
 	m_BrightnessScrollBar->SetValue(value);
 
 	int valueOnEnter = (m_BrightnessSetOnEnter->GetMax() + m_BrightnessSetOnEnter->GetMin()) / 2.0;
 	m_BrightnessSetOnEnter->SetValue(0);
+	
 	OnScrollingBrightness(tmp);
 }
 
 void MyBrightnessSaturationContrastDialog::SaturationReset(wxCommandEvent& event) {
 	wxScrollEvent tmp{};
+
+	if (wasLastKeyResetSaturation)
+		return;
+	resetSaturation = true;
+
 	int value = (m_SaturationScrollBar->GetMax() + m_SaturationScrollBar->GetMin()) / 2.0;
 	m_SaturationScrollBar->SetValue(value);
 
@@ -85,6 +124,10 @@ void MyBrightnessSaturationContrastDialog::SaturationReset(wxCommandEvent& event
 
 void MyBrightnessSaturationContrastDialog::ContrastReset(wxCommandEvent& event) {
 	wxScrollEvent tmp{};
+	if (wasLastKeyResetContrast)
+		return;
+	resetContrast = true;
+
 	int value = (m_ContrastScrollBar->GetMax() + m_ContrastScrollBar->GetMin()) / 2;
 	m_ContrastScrollBar->SetValue(value);
 
